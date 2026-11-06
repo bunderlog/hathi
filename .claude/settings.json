@@ -1,0 +1,7 @@
+{
+  "attribution": {"commit":""},
+  "outputStyle": "baloo:short-replies",
+  "enabledPlugins": {
+    "baloo@bunderlog": true
+  }
+}
