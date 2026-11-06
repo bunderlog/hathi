@@ -78,9 +78,9 @@ exec gitleaks git --pre-commit --staged --redact --verbose
 
 ## Development
 
-`mise run check` lints (golangci-lint with gofmt and goimports, actionlint) and tests; a tag
-`v<version>` makes the Release. `baloo`'s Git hooks also run gitleaks and the lint before a commit,
-and the tests before a push (`.claude/baloo.yml`).
+`mise run check` lints (golangci-lint with gofmt and goimports, actionlint, zizmor) and tests; a
+tag `v<version>` makes the Release. `baloo`'s Git hooks also run gitleaks and the lint before a
+commit, and the tests before a push (`.claude/baloo.yml`).
 
 ## GitHub repo
 

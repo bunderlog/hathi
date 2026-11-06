@@ -5,12 +5,13 @@ go = "1.27.3"
 golangci-lint = "2.15.0"
 goreleaser = "2.20.0"
 shellcheck = "0.11.0"
+zizmor = "1.32.0"
 
 [tasks.test]
 run = "go test ./..."
 
 [tasks.lint]
-run = ["golangci-lint run", "actionlint"]
+run = ["golangci-lint run", "actionlint", "zizmor --offline --no-progress .github/workflows"]
 
 [tasks.check]
 depends = ["lint", "test"]

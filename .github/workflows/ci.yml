@@ -3,14 +3,18 @@ on:
   push:
     branches: [main]
   pull_request:
+permissions: {}
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # hathi check ci reads the history
-      - uses: jdx/mise-action@v5
+          persist-credentials: false
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
       - run: mise run check
       # hathi checks its own commits.
       - run: go run . check ci

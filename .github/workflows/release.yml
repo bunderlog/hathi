@@ -2,30 +2,38 @@ name: release
 on:
   push:
     tags: ["v*"]
+permissions: {}
 jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: jdx/mise-action@v5
+          persist-credentials: false
+      # No cache, which a run on any branch could have written, in what builds the Release.
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          cache: false
       - run: mise exec -- goreleaser release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   # mise installs the Release a project pins, and it prints its version (PRD, criterion 11).
   install:
     needs: release
+    permissions:
+      contents: read
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, macos-15-intel]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: jdx/mise-action@v5
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install: false
+          cache: false
       - run: |
           version="${GITHUB_REF_NAME#v}"
           mkdir project && cd project
