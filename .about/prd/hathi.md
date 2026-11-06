@@ -253,7 +253,7 @@ semantic-release do those).
     On macOS and Linux, `"github:bunderlog/hathi" = "<version>"` under `[tools]` in `mise.toml`
     makes `mise install` install it, and `hathi version` then prints `<version>`; a workflow checks
     it after each Release.
-    → test: .github/workflows/release.yml "install", run after each Release, so not yet
+    → test: .github/workflows/release.yml "install", run after each Release
 12. `hathi version` and `hathi --version` print the binary's own version, such as `1.0.0`, which
     is the exact pin of criterion 11 when mise installed it; one built by
     `go install …@v<version>` prints `<version>` too.

@@ -11,7 +11,7 @@ Part of [bunderlog](https://github.com/bunderlog).
 
 ## Status
 
-1.0 is built, not yet released. The Checks are ported from the `baloo` plugin
+1.0 is released. The Checks are ported from the `baloo` plugin
 ([bunderlog/claude-plugins](https://github.com/bunderlog/claude-plugins)) at v0.34.0, into a Go
 binary that needs no Claude and no runtime.
 
