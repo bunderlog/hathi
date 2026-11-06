@@ -152,10 +152,10 @@ allows squash merges, since GitHub takes a squashed commit's message from the PR
 projects merge by rebase, so the commits in the range are what lands on `main`; a `push` to `main`
 checks what actually landed, a squashed message included.
 
-Exit codes: `0` every Check passed, `1` a Check failed, `2` a usage or settings error, so CI tells
-bad code from a broken run; a Check that can't check, as where Git fails, exits `2` too. The other
-Checks and commits still run and print their Verdicts, and `hathi` exits with the worst code, `2`
-over `1`, as `baloo`'s Git hooks do.
+Exit codes: `0` every Check passed, `1` a Check failed, `2` a usage error or a Settings problem, so
+CI tells bad code from a broken run; a Check that can't check, as where Git fails, exits `2` too.
+The other Checks and commits still run and print their Verdicts, and `hathi` exits with the worst
+code, `2` over `1`, as `baloo`'s Git hooks do.
 
 Left out on purpose: `init` or `install` (`hathi` writes no file and no Git config), `fix`
 (rewriting a message is for a person or Claude), `changelog` and `release` (cocogitto and
@@ -209,12 +209,13 @@ semantic-release do those).
    annotations when `GITHUB_ACTIONS` is `true` and text otherwise.
    → test: internal/cli/cli_test.go "TestGitHubAnnotations"; internal/cli/cli_test.go
    "TestRangePrintsEachVerdictInJSON"
-6. A usage or settings error exits `2`, never `1`: among them `--only` with `--skip`, `--only` or
-   `--skip` naming an unknown Check or one of another hook, `hathi check` with neither a hook nor
-   `--range`, and `hathi check ci` outside GitHub Actions, whose message names `--range`. So does
-   a Check that can't check, as on an unreadable message file or where Git fails.
+6. A usage error or a Settings problem exits `2`, never `1`: among them `--only` with `--skip`,
+   `--only` or `--skip` naming an unknown Check or one of another hook, `hathi check` with neither a
+   hook nor `--range`, and `hathi check ci` outside GitHub Actions, whose message names `--range`.
+   So does a Check that can't check, as on an unreadable message file or where Git fails.
    → test: internal/cli/cli_test.go "TestUsageErrorsExit2"; internal/cli/cli_test.go
-   "TestCantCheckExits2"; internal/cli/cli_test.go "TestOnlyAndSkip"
+   "TestCantCheckExits2"; internal/cli/cli_test.go "TestOnlyAndSkip"; internal/cli/cli_test.go
+   "TestRangeExits2WhereGitCantReadACommit"
 7. Settings come from `.hathi.yml` at the repo root, or the file `--config` names (ADR config);
    with none, every Check above is on with its defaults, and `hathi config --default` prints exactly
    those defaults. An unknown key or a bad value exits `2` with its line number. Over a range, a
