@@ -103,6 +103,16 @@ func TestCheck_PassesALineMarkedAllowSecret(t *testing.T) {
 	expect(t, find(t, dir), checks.Finding{File: "a.go", Line: 2, Reason: "an AWS access key"})
 }
 
+// gitleaks' mark passes too, on a line and on an Env file's first line.
+func TestCheck_PassesWhatGitleaksAllowMarks(t *testing.T) {
+	dir := gittest.Repo(t)
+	gittest.Stage(t, dir, map[string]string{
+		"a.go": aws + " // gitleaks:allow\n",
+		".env": "# gitleaks:allow\nPORT=3000\n",
+	})
+	expect(t, find(t, dir))
+}
+
 // Only lines the staged changes add count, by their line in the staged file.
 // baloo: test_secrets.py test_finds_only_added_lines
 func TestCheck_FindsOnlyAddedLines(t *testing.T) {

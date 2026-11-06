@@ -169,7 +169,7 @@ semantic-release do those).
 - Installing Git hooks. The project wires `hathi` into its own hooks (ADR hooks); `hathi` only runs
   inside them.
 - Running gitleaks or matching its rules: 1.0 finds the Secrets `baloo` v0.34.0 finds; deeper
-  scanning waits for its Inbox item.
+  scanning is gitleaks', run beside `hathi` (ADR secrets).
 - Running the project's own commands (`mise run check`); that is the project's hook config.
 - Guarding Claude's tool calls; that belongs to a Claude Code plugin, inside the session.
 - Testing on Windows: the Windows binary ships, but the Checks are tried on macOS and Linux only.

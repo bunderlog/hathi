@@ -64,6 +64,7 @@ static file per platform.
   `SHA256SUMS`; their names are in the PRD (criterion 11).
 - A project's `mise.toml` gains one pinned tool line; a project template can carry it.
 - CI runs `hathi` from mise instead of downloading a `baloo` Release and running its `run.py`.
-- The Checks are ported from `baloo`'s Python (`plugins/baloo/scripts/baloo/checks/`) to Go. Until
-  the split, `baloo` keeps running its own copy; `hathi` must give the same Verdicts, which Go tests
-  mirroring `baloo`'s prove (PRD, criterion 10).
+- 1.0 ported the Checks from `baloo`'s Python (`plugins/baloo/scripts/baloo/checks/`) to Go, with
+  the same Verdicts, which Go tests mirroring `baloo`'s prove (PRD, criterion 10). Since
+  2026-11-06 the Checks live in `hathi` and `baloo` drops each one `hathi` has, so no Check is kept
+  in two places and none changes in `baloo` first.

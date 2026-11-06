@@ -11,10 +11,9 @@ Check a change with `mise run check` (golangci-lint, `go test`).
 - Naming anything in code, UI or docs: `.about/glossary.md`. One word per concept, the glossary's.
 - Open questions: `.about/inbox.md`. Answer from there, don't settle them in code.
 
-## Where the Checks come from
+## Where the Checks live
 
-The Checks are ported from the `baloo` plugin in
-[bunderlog/claude-plugins](https://github.com/bunderlog/claude-plugins), at the Release the PRD
-names: its code in `plugins/baloo/scripts/baloo/checks/`, its ADRs `checks`, `git-hooks` and
-`binary` in `.about/adr/`, and its test cases in `tests/`, which `hathi` must agree with. Read them
-there, or in a local clone if one is at hand, before porting a Check.
+Here (ADR distribution): 1.0 ported them from the `baloo` plugin in
+[bunderlog/claude-plugins](https://github.com/bunderlog/claude-plugins) at v0.34.0, and `baloo`
+drops each one `hathi` has. A Check changes here, not in `baloo` first; a `// baloo:` comment names
+the `baloo` test a test was ported from.

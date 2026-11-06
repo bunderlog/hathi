@@ -45,8 +45,8 @@ To fix it, remove the Secret from the change and keep it in the environment or a
 one already pushed is out, so revoke it too. Keep an Env file out of Git, or commit a template.
 
 To mark a false alarm, put hathi:allow-secret on the line, or on an Env file's first line, whose
-lines are still looked through; baloo:allow-secret passes too. A project that needs deeper
-scanning runs gitleaks beside hathi.
+lines are still looked through; baloo:allow-secret and gitleaks:allow pass too. A project that
+needs deeper scanning runs gitleaks beside hathi.
 `,
 	"no-conflict-markers": `no-conflict-markers (pre-commit) looks for a conflict marker the changes
 add, as git diff --check finds them, in a file where one of them opens or closes a conflict (<<<<<<<

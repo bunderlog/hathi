@@ -10,8 +10,8 @@ import (
 )
 
 // Allow marks a false alarm: on a line, or on an Env file's first line. `baloo`'s mark passes too,
-// so lines already marked still pass.
-var Allow = []string{"hathi:allow-secret", "baloo:allow-secret"}
+// so lines already marked still pass, and gitleaks', so one mark serves both (ADR secrets).
+var Allow = []string{"hathi:allow-secret", "baloo:allow-secret", "gitleaks:allow"}
 
 // Each kind of Secret, by its name; the first that matches names it, so the more specific come
 // first.

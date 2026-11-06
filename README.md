@@ -53,6 +53,29 @@ Every Check is on without settings; `hathi config --default > .hathi.yml` writes
 change. `hathi explain <check>` says how to fix a failure, `hathi doctor` what is wrong with how
 the repo runs `hathi`, and `hathi help` lists the rest.
 
+### Deeper secret scanning
+
+`no-secrets-in-commits` finds Env files and the kinds of key with a prefix of their own, such as
+AWS's or GitHub's. For more, run [gitleaks](https://github.com/gitleaks/gitleaks) beside `hathi`,
+and keep both on: only `hathi` flags an Env file. `gitleaks:allow` marks a false alarm for both.
+
+```toml
+[tools]
+"github:bunderlog/hathi" = "1.0.1"
+gitleaks = "8.30.1"
+```
+
+```sh
+#!/bin/sh
+# .githooks/pre-commit
+hathi check pre-commit "$@" || exit
+exec gitleaks git --pre-commit --staged --redact --verbose
+```
+
+```yaml
+- run: gitleaks git --redact
+```
+
 ## Development
 
 `mise run check` lints and tests; a tag `v<version>` makes the Release.
@@ -75,5 +98,6 @@ the repo runs `hathi`, and `hathi help` lists the rest.
 - [.about/adr/hooks.md](.about/adr/hooks.md) — `hathi` runs inside Git hooks and never installs
   them.
 - [.about/adr/config.md](.about/adr/config.md) — the settings are `.hathi.yml` at the repo root.
+- [.about/adr/secrets.md](.about/adr/secrets.md) — `hathi` finds a few kinds of Secret, and
+  gitleaks beside it finds the rest.
 - [.about/glossary.md](.about/glossary.md) — the terms.
-- [.about/inbox.md](.about/inbox.md) — open questions.
