@@ -14,6 +14,7 @@ import (
 	"go.yaml.in/yaml/v3"
 
 	"github.com/bunderlog/hathi/internal/checks"
+	"github.com/bunderlog/hathi/internal/settings"
 )
 
 // A finding of `hathi doctor`: one thing it checked, and what it found.
@@ -25,22 +26,7 @@ type diagnosis struct {
 
 // doctor is `hathi doctor`: what is wrong with how this repo runs `hathi`. It changes nothing.
 func doctor(version string, args []string, stdout, stderr io.Writer) int {
-	pos, values, err := flags(args, []string{"format", "config"}, nil)
-	f := "text"
-	if err == nil && len(pos) > 0 {
-		err = usagef("hathi doctor takes no arguments")
-	}
-	if err == nil {
-		f, err = format(values, "text", "json")
-	}
-	var top string
-	if err == nil {
-		top, err = toplevel()
-	}
-	var l loaded
-	if err == nil {
-		l, err = load(top, values)
-	}
+	f, top, l, err := readSettings("doctor", args)
 	if err != nil {
 		fmt.Fprintln(stderr, "hathi: "+err.Error())
 		return 2
@@ -53,7 +39,7 @@ func doctor(version string, args []string, stdout, stderr io.Writer) int {
 		}
 	case l.file == "":
 		found = append(found, diagnosis{"settings", false,
-			"no " + filepathOf(values) + ": every Check is on with its defaults"})
+			"no " + settings.File + ": every Check is on with its defaults"})
 	default:
 		found = append(found, diagnosis{"settings", false, l.file + " holds no problem"})
 	}
@@ -90,13 +76,6 @@ func doctor(version string, args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	return code
-}
-
-func filepathOf(values map[string][]string) string {
-	if len(values["config"]) > 0 {
-		return values["config"][0]
-	}
-	return ".hathi.yml"
 }
 
 // hookDiagnosis says whether Git runs `hathi check <hook>` in the repo at `top`: a line with it

@@ -184,3 +184,12 @@ func TestFailsOutsideARepo(t *testing.T) {
 
 // baloo: test_secrets.py test_masks_each_secret_and_nothing_else — left out: `hathi` has no
 // mask_secrets, which only `baloo`'s Hooks use, to keep Secrets out of Claude's context.
+
+// A path with a space, or one Git quotes, is named as it is.
+func TestNamesAPathAsItIs(t *testing.T) {
+	dir := gittest.Repo(t)
+	gittest.Stage(t, dir, map[string]string{"a b.txt": aws + "\n", `a"b.txt`: aws + "\n"})
+	expect(t, find(t, dir),
+		checks.Finding{File: "a b.txt", Line: 1, Reason: "an AWS access key"},
+		checks.Finding{File: `a"b.txt`, Line: 1, Reason: "an AWS access key"})
+}

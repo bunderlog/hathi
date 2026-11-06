@@ -3,7 +3,6 @@ package size
 
 import (
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -12,8 +11,6 @@ import (
 
 // DefaultMaxSize is the largest file a commit may add without a setting, in KB.
 const DefaultMaxSize = 1024
-
-var number = regexp.MustCompile(`^[+-]?[0-9]+$`)
 
 // Check is no-large-files: each file the changes add over `maxSize` KB, of 1024 bytes. A file
 // already committed passes, changed or renamed too, and so does a submodule.
@@ -48,10 +45,10 @@ func Check(maxSize int) checks.Check {
 			}
 			var found []checks.Finding
 			for i, line := range checks.Lines(sizes) {
-				if !number.MatchString(line) || i >= len(paths) {
+				size, err := strconv.Atoi(line)
+				if err != nil || i >= len(paths) {
 					return nil, fmt.Errorf("git cat-file: \"%s\" is not a size", line)
 				}
-				size, _ := strconv.Atoi(line)
 				if size > maxSize*1024 {
 					found = append(found, checks.Finding{
 						File:   paths[i],

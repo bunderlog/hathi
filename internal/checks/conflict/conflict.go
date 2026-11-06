@@ -2,7 +2,6 @@
 package conflict
 
 import (
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -11,8 +10,6 @@ import (
 
 // Ends a line of `git diff --check` for a conflict marker.
 const leftover = ": leftover conflict marker"
-
-var number = regexp.MustCompile(`^[+-]?[0-9]+$`)
 
 // Check is no-conflict-markers: each conflict marker the changes add, as Git's own `diff --check`
 // finds them, in a file where one of them opens or closes a conflict: a Markdown heading
@@ -34,13 +31,13 @@ var Check = checks.Check{
 				continue
 			}
 			path, n, ok := cutLast(strings.TrimSuffix(text, leftover), ":")
-			if !ok || !number.MatchString(n) {
+			i, err := strconv.Atoi(n)
+			if !ok || err != nil {
 				continue
 			}
 			if _, seen := lines[path]; !seen {
 				paths = append(paths, path)
 			}
-			i, _ := strconv.Atoi(n)
 			lines[path] = append(lines[path], i)
 		}
 		var found []checks.Finding

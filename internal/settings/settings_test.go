@@ -135,3 +135,11 @@ func TestSchemaHasTheSettingsKeys(t *testing.T) {
 		})
 	}
 }
+
+// YAML's own spellings of true and false, such as True, are booleans too.
+func TestTakesEachSpellingOfABoolean(t *testing.T) {
+	got, problems := Parse("no-ai-coauthor: True\nlinear-history: FALSE\nconventional-commits: {pr-title: TRUE}\n")
+	if problems != nil || !got.On("no-ai-coauthor") || got.On("linear-history") || !got.PRTitle {
+		t.Errorf("got %+v and %v, want no-ai-coauthor on, linear-history off, pr-title on", got, problems)
+	}
+}

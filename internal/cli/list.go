@@ -10,22 +10,7 @@ import (
 
 // list is `hathi list`: every Check, its Git hook, whether it is on in this repo, and its settings.
 func list(args []string, stdout, stderr io.Writer) int {
-	pos, values, err := flags(args, []string{"format", "config"}, nil)
-	f := "text"
-	if err == nil && len(pos) > 0 {
-		err = usagef("hathi list takes no arguments")
-	}
-	if err == nil {
-		f, err = format(values, "text", "json")
-	}
-	var top string
-	if err == nil {
-		top, err = toplevel()
-	}
-	var l loaded
-	if err == nil {
-		l, err = load(top, values)
-	}
+	f, _, l, err := readSettings("list", args)
 	if err != nil {
 		fmt.Fprintln(stderr, "hathi: "+err.Error())
 		return 2
@@ -71,6 +56,25 @@ func list(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	return 0
+}
+
+// readSettings reads what `hathi <command>` takes, --format text|json and --config, and the
+// Settings of the repo it runs in: the format, the repo's root and its Settings.
+func readSettings(command string, args []string) (f, top string, l loaded, err error) {
+	pos, values, err := flags(args, []string{"format", "config"}, nil)
+	if err == nil && len(pos) > 0 {
+		err = usagef("hathi %s takes no arguments", command)
+	}
+	if err == nil {
+		f, err = format(values, "text", "json")
+	}
+	if err == nil {
+		top, err = toplevel()
+	}
+	if err == nil {
+		l, err = load(top, values)
+	}
+	return f, top, l, err
 }
 
 // An option is a Check's setting and its value.

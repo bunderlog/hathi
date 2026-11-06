@@ -396,3 +396,21 @@ func TestPrintsNoColor(t *testing.T) {
 		})
 	}
 }
+
+// Criterion 3: where Git can't read a commit's settings, the range exits 2 rather than checking
+// the commit with the defaults.
+func TestRangeExits2WhereGitCantReadACommit(t *testing.T) {
+	dir := repo(t)
+	base := gittest.Commit(t, dir, "feat: base")
+	gittest.Stage(t, dir, map[string]string{"a.go": "x\n"})
+	head := gittest.Commit(t, dir, "feat: a")
+	tree := strings.TrimSpace(gittest.Git(t, dir, "rev-parse", head+"^{tree}"))
+	if err := os.Remove(filepath.Join(dir, ".git", "objects", tree[:2], tree[2:])); err != nil {
+		t.Fatal(err)
+	}
+	// Only the commit-msg Checks run, so the settings are all that reads the tree.
+	got := hathi("", "check", "--range", base+".."+head, "--only", "conventional-commits")
+	if got.code != 2 {
+		t.Errorf("got %d and %q, want 2", got.code, got.stderr)
+	}
+}

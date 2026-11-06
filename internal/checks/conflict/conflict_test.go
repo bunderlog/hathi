@@ -88,3 +88,18 @@ func TestReadsACommitWithItsOwnAttributes(t *testing.T) {
 		t.Errorf("got %v and %v, want a.go:1", got, err)
 	}
 }
+
+// A Git failure on a commit's changes names the subcommand that failed, past --attr-source.
+func TestNamesTheGitSubcommandThatFailed(t *testing.T) {
+	dir := gittest.Repo(t)
+	_, err := find(dir + "/missing")
+	if err == nil || !strings.HasPrefix(err.Error(), "git diff: ") {
+		t.Errorf("got %v, want it to name git diff", err)
+	}
+	_, err = Check.Find(checks.Input{Changes: checks.Changes{
+		Repo: checks.Repo{Dir: dir}, Commit: strings.Repeat("6", 40), Parent: strings.Repeat("7", 40),
+	}})
+	if err == nil || !strings.HasPrefix(err.Error(), "git diff: ") {
+		t.Errorf("got %v, want it to name git diff", err)
+	}
+}
