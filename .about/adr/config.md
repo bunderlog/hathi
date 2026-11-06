@@ -1,11 +1,13 @@
 # The settings are `.hathi.yml` at the repo root
 
-Date: 2026-11-04
+Date: 2026-11-06
 
 `hathi` reads its settings from one file, `.hathi.yml`, at the root of the repo
-(`git rev-parse --show-toplevel`). It looks nowhere else and merges nothing: a monorepo has one
-file for the whole repo. `--config <path>` points at another file, for CI or an unusual layout.
-Without a file every Check is on with its defaults, as the PRD says.
+(`git rev-parse --show-toplevel`). It looks nowhere else and merges nothing: a monorepo has one file
+for the whole repo. Over a range (`hathi check ci`, `--range`), each commit is checked with its own
+`.hathi.yml`, as its Git hooks would have checked it, so a commit that loosens a setting doesn't
+loosen it for the commits before. `--config <path>` points at another file, for CI or an unusual
+layout. Without a file every Check is on with its defaults, as the PRD says.
 
 The file is YAML. Its first line names the JSON Schema for editors,
 `# yaml-language-server: $schema=…`, so keys complete and wrong values show as you type, as
@@ -49,4 +51,6 @@ its own reader (Python's standard library only) doesn't apply.
 - When `baloo` calls `hathi` instead of its own copy, the Checks' keys under `git-hooks` in each
   project's `.claude/baloo.yml` move to `.hathi.yml`: one migration per project, which `baloo`
   should offer rather than leave to be found.
-- The schema is published from this repo, so `$schema` points at a stable raw URL on `main`.
+- The schema is `schema.json` at this repo's root, and `$schema` points at its raw URL on `main`,
+  `https://raw.githubusercontent.com/bunderlog/hathi/main/schema.json`. Every project's
+  `.hathi.yml` carries that URL, so the file stays where it is.

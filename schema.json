@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/bunderlog/hathi/main/schema.json",
+  "title": ".hathi.yml",
+  "description": "hathi's settings for a repo: each Check on with true, off with false, or its settings. A Check without its key is on with its defaults.",
+  "type": ["object", "null"],
+  "properties": {
+    "conventional-commits": {
+      "description": "commit-msg: the message is a Conventional Commit, as commitlint's config-conventional reads it; its settings instead of true.",
+      "oneOf": [
+        { "type": "boolean" },
+        {
+          "type": "object",
+          "properties": {
+            "types": {
+              "description": "The types a subject may have, or any. config-conventional's 11 without it.",
+              "oneOf": [{ "type": "array", "items": { "type": "string" } }, { "const": "any" }]
+            },
+            "scopes": {
+              "description": "The scopes a subject may have, or any, as commitlint's scope-enum matches them; a subject without a scope passes either way. any without it.",
+              "oneOf": [
+                { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+                { "const": "any" }
+              ]
+            },
+            "max-length": {
+              "description": "The longest line, in characters; 0 for no limit. 100 without it.",
+              "type": "integer",
+              "minimum": 0
+            },
+            "pr-title": {
+              "description": "Whether hathi check ci checks a pull request's title too: on where the repo allows squash merges. false without it.",
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "no-ai-coauthor": {
+      "description": "commit-msg: no AI as a commit's co-author, and no line crediting one; a person's Co-authored-by passes.",
+      "type": "boolean"
+    },
+    "no-secrets-in-commits": {
+      "description": "pre-commit: the changes add no Secret and no Env file; hathi:allow-secret marks a false alarm.",
+      "type": "boolean"
+    },
+    "no-conflict-markers": {
+      "description": "pre-commit: the changes add no conflict marker; a longer conflict-marker-size in .gitattributes lets a file hold them.",
+      "type": "boolean"
+    },
+    "no-large-files": {
+      "description": "pre-commit: the changes add no file over max-size; a file already committed passes. Its settings instead of true.",
+      "oneOf": [
+        { "type": "boolean" },
+        {
+          "type": "object",
+          "properties": {
+            "max-size": {
+              "description": "The largest file a commit may add, in KB of 1024 bytes. 1024 without it.",
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "linear-history": {
+      "description": "pre-push: the push sends no merge commit.",
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

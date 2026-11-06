@@ -15,9 +15,10 @@ them. GitHub Releases are the only registry:
 
 It is one binary with subcommands (`hathi check commit-msg`, `hathi check pre-commit`, …), as
 `git` or `gh` are, not a binary per Check. The Checks share reading Git (staged changes, a range,
-pushed refs on stdin), the config and the Verdict format, and a project picks Checks in its config,
-not by installing binaries. Each Check is a Go package of its own under `internal/checks/` behind
-one interface, so one that grows into a product of its own moves out in one commit.
+pushed refs on stdin), the settings and the Verdict format, and a project picks Checks in its
+settings, not by installing binaries. Each Check is a Go package of its own under
+`internal/checks/` behind one interface, so one that grows into a product of its own moves out in
+one commit.
 
 npm and PyPI add nothing: everyone who needs `hathi` reaches it through mise, `go install` or the
 plugin. The name is free on npm and taken on PyPI (checked 2026-11-03).
@@ -63,8 +64,6 @@ static file per platform.
   `SHA256SUMS`; their names are in the PRD (criterion 11).
 - A project's `mise.toml` gains one pinned tool line; a project template can carry it.
 - CI runs `hathi` from mise instead of downloading a `baloo` Release and running its `run.py`.
-- The Checks are ported from `baloo`'s Python (`scripts/baloo/checks/`) to Go. Until the split,
-  `baloo` keeps running its own copy; `hathi` must give the same Verdicts, which Go tests mirroring
-  `baloo`'s prove (PRD, criterion 10).
-- When `baloo` later calls `hathi` instead of its own copy, the plugin depends on a binary; how it
-  gets one is the plugin's decision, not this one.
+- The Checks are ported from `baloo`'s Python (`plugins/baloo/scripts/baloo/checks/`) to Go. Until
+  the split, `baloo` keeps running its own copy; `hathi` must give the same Verdicts, which Go tests
+  mirroring `baloo`'s prove (PRD, criterion 10).

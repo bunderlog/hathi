@@ -1,0 +1,22 @@
+# The Release a tag v<version> makes (PRD, criterion 11).
+version: 2
+builds:
+  - env: [CGO_ENABLED=0]
+    goos: [darwin, linux, windows]
+    goarch: [amd64, arm64]
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags: ["-s -w -X main.version={{ .Version }}"]
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    # The one binary, without the README and LICENSE an archive holds by default.
+    files: [none*]
+checksum:
+  name_template: SHA256SUMS
+changelog:
+  disable: true
