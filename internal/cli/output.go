@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// A Verdict is what a Check returns, one per finding: a failing one, or a passing one for an input
-// it finds nothing in (glossary).
+// A Verdict is what `hathi check` reports for one Check on one Input: a failing one per Finding,
+// or a single passing one where there is none (glossary).
 type Verdict struct {
 	Check   string
 	Fail    bool

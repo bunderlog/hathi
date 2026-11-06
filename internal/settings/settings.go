@@ -41,7 +41,8 @@ func (s Settings) On(name string) bool {
 	return !slices.Contains(s.Off, name)
 }
 
-// A Problem is a key that isn't a setting, or a value that doesn't decode.
+// A Problem is what the Settings' text has that hathi can't take: text that isn't YAML or isn't a
+// mapping, a key that isn't a setting, or a value that doesn't decode (glossary).
 type Problem struct {
 	Line    int // 1-based; 0 where the file says none
 	Message string

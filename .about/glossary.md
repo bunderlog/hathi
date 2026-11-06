@@ -19,20 +19,29 @@ _Avoid_: config, which in `baloo` is `.claude/baloo.yml`
 _In code_: the flag `--config` and the command `hathi config` keep the names CLIs use
 
 **Settings problem**:
-A key of the Settings that isn't a setting, or a value that doesn't decode. `hathi check` stops on
-one; `hathi list` and `hathi doctor` report it beside the settings that still apply.
+Anything in the text of a Settings file that `hathi` can't take: text that isn't YAML or isn't a
+mapping, a key that isn't a setting, or a value that doesn't decode. `hathi check` stops on one;
+`hathi list` and `hathi doctor` report it beside the settings that still apply. A file `--config`
+names that doesn't exist is a usage error, not a Settings problem.
 _Avoid_: settings error
 _In code_: `settings.Problem`
 
+**Input**:
+What one Check reads in one run: a commit's message or the PR title, a commit's changes or the
+staged ones, or the pushed refs. Over a Range, a pre-push Check's Input is the whole Range, not
+each commit.
+_In code_: `checks.Input`
+
 **Finding**:
-One thing a Check fails on in one input, such as a commit's changes: where, when the Check can
-name a place, and why. An input that passes has none.
+One thing a Check fails on in one Input, such as a commit's changes: where, when the Check can
+name a place, and why. An Input that passes has none.
 _In code_: `checks.Finding`
 
 **Verdict**:
-What `hathi check` reports for one Check on one input: a failing one per Finding, or a single
+What `hathi check` reports for one Check on one Input: a failing one per Finding, or a single
 passing one where there is none. A Check that finds two Secrets gives two failing Verdicts; one
-the Settings turn off gives none.
+the Settings turn off gives none; one that can't check, as where Git fails, gives an error
+instead, and `hathi check` exits `2`.
 _In code_: `cli.Verdict`
 
 **Range**:
