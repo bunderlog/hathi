@@ -24,12 +24,12 @@ var Check = checks.Check{
 		var found []checks.Finding
 		for line := range strings.SplitSeq(in.Pushed, "\n") {
 			fields := strings.Fields(line)
-			if len(fields) < 4 || strings.Trim(fields[1], "0") == "" {
+			if len(fields) < 4 || checks.IsZero(fields[1]) {
 				continue
 			}
 			ref, local, to, remote := fields[0], fields[1], fields[2], fields[3]
 			sends := []string{local, "--not", "--remotes"}
-			if strings.Trim(remote, "0") != "" {
+			if !checks.IsZero(remote) {
 				if _, err := in.Repo.Git("cat-file", "-e", remote+"^{commit}"); err == nil {
 					sends = []string{local, "--not", remote}
 					for d := range strings.SplitSeq(strings.TrimSpace(defaults), "\n") {

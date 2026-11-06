@@ -95,6 +95,16 @@ func allowed(line string) bool {
 	return false
 }
 
+// name is the path a diff's `+++ ` line names: Git puts a tab after one with a space, and quotes
+// one with a quote, a backslash or a control character, as C does.
+func name(path string) string {
+	path = strings.TrimSuffix(path, "\t")
+	if unquoted, err := strconv.Unquote(path); err == nil && strings.HasPrefix(path, `"`) {
+		return unquoted
+	}
+	return path
+}
+
 // scan returns each Secret on a line the diff `text` adds.
 func scan(text string) []checks.Finding {
 	var found []checks.Finding
@@ -104,7 +114,7 @@ func scan(text string) []checks.Finding {
 		case strings.HasPrefix(s, "diff --git "):
 			header = true
 		case header && strings.HasPrefix(s, "+++ "):
-			path = strings.TrimPrefix(s, "+++ ")
+			path = name(strings.TrimPrefix(s, "+++ "))
 		case strings.HasPrefix(s, "@@"):
 			header = false
 			if m := hunk.FindStringSubmatch(s); m != nil {

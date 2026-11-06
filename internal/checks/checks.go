@@ -58,12 +58,14 @@ func (r Repo) GitOK(ok []int, stdin string, args ...string) (string, error) {
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
 	if err := cmd.Run(); err != nil {
+		// The subcommand, past options such as --attr-source.
+		sub := args[max(0, slices.IndexFunc(args, func(a string) bool { return !strings.HasPrefix(a, "-") }))]
 		exit, isExit := err.(*exec.ExitError)
 		if !isExit {
-			return "", fmt.Errorf("git %s: %w", args[0], err)
+			return "", fmt.Errorf("git %s: %w", sub, err)
 		}
 		if !slices.Contains(ok, exit.ExitCode()) {
-			return "", fmt.Errorf("git %s: exit status %d: %s", args[0], exit.ExitCode(),
+			return "", fmt.Errorf("git %s: exit status %d: %s", sub, exit.ExitCode(),
 				strings.TrimSpace(stderr.String()))
 		}
 	}
@@ -75,6 +77,8 @@ func (r Repo) GitOK(ok []int, stdin string, args ...string) (string, error) {
 type Changes struct {
 	Repo
 	Commit string // "" for the staged changes
+	// Parent is the commit's first parent, or the empty tree for a root commit; "" to look it up.
+	Parent string
 }
 
 // Diff returns what `git diff` with `args` prints for the changes: for a commit's, against its
@@ -84,9 +88,12 @@ func (c Changes) Diff(ok []int, args ...string) (string, error) {
 	if c.Commit == "" {
 		return c.GitOK(ok, "", append([]string{"diff", "--cached"}, args...)...)
 	}
-	parent, err := c.parent()
-	if err != nil {
-		return "", err
+	parent := c.Parent
+	if parent == "" {
+		var err error
+		if parent, err = c.parent(); err != nil {
+			return "", err
+		}
 	}
 	return c.GitOK(ok, "", append(append([]string{"--attr-source=" + c.Commit, "diff"}, args...),
 		parent, c.Commit)...)
@@ -105,7 +112,12 @@ func (c Changes) parent() (string, error) {
 	if fields := strings.Fields(out); len(fields) > 1 {
 		return fields[1], nil
 	}
-	out, err = c.GitOK(nil, "", "hash-object", "-t", "tree", "--stdin")
+	return c.EmptyTree()
+}
+
+// EmptyTree is the id of the empty tree, which a root commit's changes are against.
+func (r Repo) EmptyTree() (string, error) {
+	out, err := r.GitOK(nil, "", "hash-object", "-t", "tree", "--stdin")
 	return strings.TrimSpace(out), err
 }
 
@@ -133,6 +145,12 @@ func IsSpace(r rune) bool {
 // TrimSpace is Python's str.strip.
 func TrimSpace(s string) string {
 	return strings.TrimFunc(s, IsSpace)
+}
+
+// IsZero reports whether `id` is Git's id of no commit, all zeros, as a push gives a new ref's
+// remote side or a deletion's local one.
+func IsZero(id string) bool {
+	return strings.Trim(id, "0") == ""
 }
 
 // Lines splits `text` at "\n" without the empty string after a last one, as Python's

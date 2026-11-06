@@ -313,8 +313,16 @@ func (r *runner) commits(from, head string, not []string, title *string) int {
 			}
 			continue
 		}
+		parent := ""
+		if len(fields) > 1 {
+			parent = fields[1]
+		} else if parent, err = r.repo.EmptyTree(); err != nil {
+			r.fail(err)
+			continue
+		}
+		changes := checks.Changes{Repo: r.repo, Commit: id, Parent: parent}
 		for _, c := range r.selected(s, "pre-commit") {
-			r.run(c, checks.Input{Changes: checks.Changes{Repo: r.repo, Commit: id}}, at)
+			r.run(c, checks.Input{Changes: changes}, at)
 		}
 	}
 	s, err := r.settingsAt(headID)
@@ -347,8 +355,8 @@ func (r *runner) settingsAt(id string) (settings.Settings, error) {
 		}
 		return *r.fixed, nil
 	}
-	blob, err := r.repo.GitOK([]int{1, 128}, "", "rev-parse", "--verify", "--quiet",
-		id+":"+settings.File)
+	// Nothing where the commit has no such file, and an error where Git can't read the commit.
+	blob, err := r.repo.Git("ls-tree", "--format=%(objectname)", id, "--", settings.File)
 	if err != nil {
 		r.fail(err)
 		return settings.Settings{}, err
@@ -430,7 +438,7 @@ func (r *runner) ci() int {
 		r.fail(err)
 		return r.code
 	}
-	if name == "push" && (e.Deleted || !strings.HasPrefix(e.Ref, "refs/heads/") || zeros(e.After)) {
+	if name == "push" && (e.Deleted || !strings.HasPrefix(e.Ref, "refs/heads/") || checks.IsZero(e.After)) {
 		return 0 // a tag or a deletion brings no commits
 	}
 	if out, err := r.repo.Git("rev-parse", "--is-shallow-repository"); err != nil ||
@@ -464,9 +472,9 @@ func (r *runner) ci() int {
 	}
 	from := ""
 	switch {
-	case !zeros(e.Before) && r.has(e.Before):
+	case !checks.IsZero(e.Before) && r.has(e.Before):
 		from, err = r.mergeBase(e.Before, e.After)
-	case branch == defaultBranch && zeros(e.Before):
+	case branch == defaultBranch && checks.IsZero(e.Before):
 		// A first push of the default branch checks all its commits.
 	case branch == defaultBranch:
 		err = fmt.Errorf("the checkout lacks before, %s, which leaves no base to check from: "+
@@ -480,8 +488,4 @@ func (r *runner) ci() int {
 		return r.code
 	}
 	return r.commits(from, e.After, not, nil)
-}
-
-func zeros(id string) bool {
-	return strings.Trim(id, "0") == ""
 }

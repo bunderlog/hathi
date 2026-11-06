@@ -141,11 +141,12 @@ func isNull(n *yaml.Node) bool {
 	return n.Kind == yaml.ScalarNode && n.Tag == "!!null"
 }
 
+// boolean decodes `n` as YAML reads a boolean, True and FALSE too.
 func boolean(n *yaml.Node) (on, ok bool) {
-	if n.Kind != yaml.ScalarNode || n.Tag != "!!bool" {
+	if n.Kind != yaml.ScalarNode || n.Tag != "!!bool" || n.Decode(&on) != nil {
 		return false, false
 	}
-	return n.Value == "true", true
+	return on, true
 }
 
 // list decodes `n`, a list of strings or `any`, into `to`, nil for any. A list holds at least one
