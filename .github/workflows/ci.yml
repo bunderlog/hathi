@@ -1,0 +1,16 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # hathi check ci reads the history
+      - uses: jdx/mise-action@v5
+      - run: mise run check
+      # hathi checks its own commits.
+      - run: go run . check ci
