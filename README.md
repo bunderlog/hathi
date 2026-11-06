@@ -17,12 +17,13 @@ binary that needs no Claude and no runtime.
 
 ## Use
 
-Pin it in `mise.toml`, to an exact version: mise holds back a release for its first 24 hours, so a
-pin such as `1.0` finds none in that time and `mise install` fails.
+Pin it in `mise.toml`, to an exact version. For a release's first 24 hours mise holds it back from
+a pin such as `1.0`, which gets the release before it instead; after a first release there is none,
+and `mise install` fails.
 
 ```toml
 [tools]
-"github:bunderlog/hathi" = "1.0.0"
+"github:bunderlog/hathi" = "1.0.1"
 ```
 
 Commit the Git hooks, and turn them on once per clone. `.githooks/commit-msg` is below;
