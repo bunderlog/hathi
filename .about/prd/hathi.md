@@ -180,13 +180,13 @@ semantic-release do those).
    and `run: hathi explain <check>`, for a message that fails any enabled commit-msg Check, and `0`
    with no output when it passes. `hathi check commit-msg -` gives the same Verdict for the same
    message on stdin.
-   → test: internal/cli/cli_test.go "TestCommitMsgFailsAMessageWithALinePerFailure";
-   internal/cli/cli_test.go "TestCommitMsgPassesAMessageQuietly"
+   → test: internal/cli/cli_test.go "TestCommitMsg_FailsAMessageWithALinePerFailure";
+   internal/cli/cli_test.go "TestCommitMsg_PassesAMessageQuietly"
 2. `hathi check pre-commit` exits `1` for staged changes that fail an enabled pre-commit Check and
    `0` when they pass; `hathi check pre-push` does the same for the pushed refs on stdin as Git
    gives them, with or without `<remote> <url>` and whatever they are.
-   → test: internal/cli/cli_test.go "TestPreCommitChecksTheStagedChanges"; internal/cli/cli_test.go
-   "TestPrePushChecksThePushedRefs"
+   → test: internal/cli/cli_test.go "TestPreCommit_ChecksTheStagedChanges";
+   internal/cli/cli_test.go "TestPrePush_ChecksThePushedRefs"
 3. In GitHub Actions, `hathi check ci` with no arguments checks exactly the commits a
    `pull_request` or `push` event brings, and `hathi check --range <base>..<head>` exactly those
    `git rev-list` gives from the merge base of `<base>` and `<head>`: each commit's message and
@@ -196,43 +196,44 @@ semantic-release do those).
    `before`; a branch rebased onto the default branch isn't blamed for the commits it brings. For
    `ci`, a shallow checkout and a push to the default branch whose `before` the checkout lacks exit
    `2`; for both, so does a `<base>` or `<head>` missing from the checkout.
-   → test: internal/cli/cli_test.go "TestRangeChecksEachCommit"; internal/cli/ci_test.go
-   "TestCIChecksAPullRequestFromTheMergeBase"; internal/cli/ci_test.go
-   "TestCIChecksANewBranchSinceTheDefaultOne"; internal/cli/ci_test.go "TestCIChecksAForcePush";
-   internal/cli/ci_test.go "TestCIChecksTheDefaultBranch"; internal/cli/ci_test.go
-   "TestCIExits2WithoutTheHistory"
+   → test: internal/cli/cli_test.go "TestRange_ChecksEachCommit"; internal/cli/ci_test.go
+   "TestCI_ChecksAPullRequestFromTheMergeBase"; internal/cli/ci_test.go
+   "TestCI_ChecksANewBranchSinceTheDefaultOne"; internal/cli/ci_test.go "TestCI_ChecksAForcePush";
+   internal/cli/ci_test.go "TestCI_ChecksTheDefaultBranch"; internal/cli/ci_test.go
+   "TestCI_Exits2WithoutTheHistory"
 4. With `pr-title` on, `hathi check ci` on `pull_request` fails for a PR title that is not a
    Conventional Commit; with it off, the title is never checked.
-   → test: internal/cli/ci_test.go "TestCIChecksThePullRequestTitleWithPRTitleOn"
+   → test: internal/cli/ci_test.go "TestCI_ChecksThePullRequestTitleWithPRTitleOn"
 5. `--format github` turns each failure into a GitHub Actions annotation; `--format json` prints
    one object per Verdict, with `check`, `verdict` and `reason`. Without `--format`, `check` prints
    annotations when `GITHUB_ACTIONS` is `true` and text otherwise.
-   → test: internal/cli/cli_test.go "TestGitHubAnnotations"; internal/cli/cli_test.go
-   "TestRangePrintsEachVerdictInJSON"
+   → test: internal/cli/cli_test.go "TestCheck_AnnotatesInGitHubActions"; internal/cli/cli_test.go
+   "TestRange_PrintsEachVerdictInJSON"
 6. A usage error or a Settings problem exits `2`, never `1`: among them `--only` with `--skip`,
    `--only` or `--skip` naming an unknown Check or one of another hook, `hathi check` with neither a
    hook nor `--range`, and `hathi check ci` outside GitHub Actions, whose message names `--range`.
    So does a Check that can't check, as on an unreadable message file or where Git fails.
-   → test: internal/cli/cli_test.go "TestUsageErrorsExit2"; internal/cli/cli_test.go
-   "TestCantCheckExits2"; internal/cli/cli_test.go "TestOnlyAndSkip"; internal/cli/cli_test.go
-   "TestRangeExits2WhereGitCantReadACommit"
+   → test: internal/cli/cli_test.go "TestRun_Exits2OnAUsageError"; internal/cli/cli_test.go
+   "TestCheck_Exits2WhereACheckCantCheck"; internal/cli/cli_test.go
+   "TestCheck_OnlyAndSkipPickTheChecks"; internal/cli/cli_test.go
+   "TestRange_Exits2WhereGitCantReadACommit"
 7. Settings come from `.hathi.yml` at the repo root, or the file `--config` names (ADR config);
    with none, every Check above is on with its defaults, and `hathi config --default` prints exactly
    those defaults. An unknown key or a bad value exits `2` with its line number. Over a range, a
    commit whose `.hathi.yml` turns a Check off is checked with it off, and the commits before it
    with it on.
-   → test: internal/settings/settings_test.go "TestDefaultsWithoutSettings";
-   internal/settings/settings_test.go "TestTellsEachProblemByItsLine"; internal/cli/cli_test.go
-   "TestSettingsComeFromTheRootOrConfig"; internal/cli/cli_test.go
-   "TestConfigDefaultPrintsTheDefaults"; internal/cli/cli_test.go
-   "TestRangeChecksEachCommitWithItsOwnSettings"
+   → test: internal/settings/settings_test.go "TestParse_DefaultsWithoutSettings";
+   internal/settings/settings_test.go "TestParse_TellsEachProblemByItsLine";
+   internal/cli/cli_test.go "TestCheck_TakesSettingsFromTheRootOrConfig"; internal/cli/cli_test.go
+   "TestConfig_DefaultPrintsTheDefaults"; internal/cli/cli_test.go
+   "TestRange_ChecksEachCommitWithItsOwnSettings"
 8. `hathi doctor` and `hathi list` change no file and no Git config. `hathi doctor` exits `1` when
    it reports a problem, `2` when one is in the settings, and `0` when it reports none.
-   → test: internal/cli/cli_test.go "TestListAndDoctorChangeNothing"; internal/cli/cli_test.go
-   "TestDoctorFindsTheGitHooks"
+   → test: internal/cli/cli_test.go "TestListAndDoctor_ChangeNothing"; internal/cli/cli_test.go
+   "TestDoctor_FindsTheGitHooks"
 9. Output carries no color codes when the stream it goes to is not a terminal, when `NO_COLOR`
    is set, or in `json` and `github`.
-   → test: internal/cli/cli_test.go "TestPrintsNoColor"
+   → test: internal/cli/cli_test.go "TestCheck_PrintsNoColor"
 10. For every test in `test_commit.py`, `test_coauthor.py`, `test_secrets.py`,
     `test_conflict.py`, `test_size.py` and `test_history.py` of `tests/checks/` in
     `bunderlog/claude-plugins` at v0.34.0, a Go test names it in a comment,
@@ -258,4 +259,5 @@ semantic-release do those).
 12. `hathi version` and `hathi --version` print the binary's own version, such as `1.0.0`, which
     is the exact pin of criterion 11 when mise installed it; one built by
     `go install …@v<version>` prints `<version>` too.
-    → test: internal/cli/cli_test.go "TestVersion" (a `go install` build's version is not tested)
+    → test: internal/cli/cli_test.go "TestVersion_PrintsItWithoutTheV" (a `go install` build's
+    version is not tested)

@@ -76,13 +76,13 @@ func expect(t *testing.T, dir, pushed, branch string, merges ...string) {
 }
 
 // baloo: test_history.py test_finds_a_merge_being_pushed
-func TestFindsAMergeBeingPushed(t *testing.T) {
+func TestCheck_FindsAMergeBeingPushed(t *testing.T) {
 	dir, base, merge, _ := history(t)
 	expect(t, dir, push("main", merge, base), "main", merge)
 }
 
 // baloo: test_history.py test_passes_merges_the_remote_has
-func TestPassesMergesTheRemoteHas(t *testing.T) {
+func TestCheck_PassesMergesTheRemoteHas(t *testing.T) {
 	dir, _, merge, after := history(t)
 	expect(t, dir, push("main", after, merge), "main")
 }
@@ -90,7 +90,7 @@ func TestPassesMergesTheRemoteHas(t *testing.T) {
 // A branch new to the remote, or whose remote commit isn't here, is checked against every
 // remote-tracking branch.
 // baloo: test_history.py test_checks_a_new_branch_against_the_remote_tracking_branches
-func TestChecksANewBranchAgainstTheRemoteTrackingBranches(t *testing.T) {
+func TestCheck_ChecksANewBranchAgainstTheRemoteTrackingBranches(t *testing.T) {
 	dir, _, merge, after := history(t)
 	for _, remote := range []string{zero, strings.Repeat("1", 40)} {
 		t.Run(remote[:4], func(t *testing.T) { expect(t, dir, push("main", after, remote), "main", merge) })
@@ -102,7 +102,7 @@ func TestChecksANewBranchAgainstTheRemoteTrackingBranches(t *testing.T) {
 // A branch rebased onto main sends main's merges past the remote commit, but the remote's default
 // branch already has them.
 // baloo: test_history.py test_passes_a_rebase_onto_mains_merges
-func TestPassesARebaseOntoMainsMerges(t *testing.T) {
+func TestCheck_PassesARebaseOntoMainsMerges(t *testing.T) {
 	dir, base, _, after := cloned(t)
 	gittest.Git(t, dir, "checkout", "-q", "-b", "feature", base)
 	old := gittest.Commit(t, dir, "feat: feature")
@@ -112,7 +112,7 @@ func TestPassesARebaseOntoMainsMerges(t *testing.T) {
 }
 
 // baloo: test_history.py test_passes_a_branch_fast_forwarded_onto_main
-func TestPassesABranchFastForwardedOntoMain(t *testing.T) {
+func TestCheck_PassesABranchFastForwardedOntoMain(t *testing.T) {
 	dir, base, _, after := cloned(t)
 	gittest.Git(t, dir, "checkout", "-q", "-b", "feature", after)
 	ahead := gittest.Commit(t, dir, "feat: feature")
@@ -120,7 +120,7 @@ func TestPassesABranchFastForwardedOntoMain(t *testing.T) {
 }
 
 // baloo: test_history.py test_finds_a_merge_a_rebased_branch_adds
-func TestFindsAMergeARebasedBranchAdds(t *testing.T) {
+func TestCheck_FindsAMergeARebasedBranchAdds(t *testing.T) {
 	dir, base, _, after := cloned(t)
 	gittest.Git(t, dir, "checkout", "-q", "-b", "old", base)
 	old := gittest.Commit(t, dir, "feat: feature")
@@ -130,7 +130,7 @@ func TestFindsAMergeARebasedBranchAdds(t *testing.T) {
 
 // A merge on a remote branch other than the default one isn't on the branch the push rewrites.
 // baloo: test_history.py test_finds_a_merge_from_another_remote_branch
-func TestFindsAMergeFromAnotherRemoteBranch(t *testing.T) {
+func TestCheck_FindsAMergeFromAnotherRemoteBranch(t *testing.T) {
 	dir, base, _, after := cloned(t)
 	other := withMerge(t, dir, "other", base)
 	gittest.Git(t, dir, "update-ref", "refs/remotes/origin/other", other)
@@ -139,7 +139,7 @@ func TestFindsAMergeFromAnotherRemoteBranch(t *testing.T) {
 
 // The tracking ref of the branch pushed to doesn't count, past the remote commit.
 // baloo: test_history.py test_finds_a_merge_rewriting_the_default_branch
-func TestFindsAMergeRewritingTheDefaultBranch(t *testing.T) {
+func TestCheck_FindsAMergeRewritingTheDefaultBranch(t *testing.T) {
 	dir, base, merge, after := cloned(t)
 	gittest.Git(t, dir, "checkout", "-q", "-b", "old", base)
 	old := gittest.Commit(t, dir, "feat: old")
@@ -147,19 +147,19 @@ func TestFindsAMergeRewritingTheDefaultBranch(t *testing.T) {
 }
 
 // baloo: test_history.py test_passes_a_linear_history
-func TestPassesALinearHistory(t *testing.T) {
+func TestCheck_PassesALinearHistory(t *testing.T) {
 	dir, base, _, _ := history(t)
 	expect(t, dir, push("main", base, zero), "main")
 }
 
 // baloo: test_history.py test_ignores_deletions_and_blank_lines
-func TestIgnoresDeletionsAndBlankLines(t *testing.T) {
+func TestCheck_IgnoresDeletionsAndBlankLines(t *testing.T) {
 	dir, base, _, _ := history(t)
 	expect(t, dir, "\nrefs/heads/x "+zero+" refs/heads/x "+base+"\n", "x")
 }
 
 // baloo: test_history.py test_fails_on_a_commit_not_here
-func TestFailsOnACommitNotHere(t *testing.T) {
+func TestCheck_FailsOnACommitNotHere(t *testing.T) {
 	dir, base, _, _ := history(t)
 	if _, err := find(dir, push("main", strings.Repeat("2", 40), base)); err == nil {
 		t.Error("got no error for a commit not here")

@@ -14,7 +14,7 @@ import (
 
 // Criterion 7: with no file, or an empty one, every Check is on with its defaults, and
 // `hathi config --default` prints exactly those defaults.
-func TestDefaultsWithoutSettings(t *testing.T) {
+func TestParse_DefaultsWithoutSettings(t *testing.T) {
 	want := Settings{
 		Commit: commit.Rules{
 			Types: []string{"build", "chore", "ci", "docs", "feat", "fix", "perf", "refactor",
@@ -38,7 +38,7 @@ func TestDefaultsWithoutSettings(t *testing.T) {
 	}
 }
 
-func TestTakesEachSetting(t *testing.T) {
+func TestParse_TakesEachSetting(t *testing.T) {
 	got, problems := Parse(`
 conventional-commits:
   types: any
@@ -62,7 +62,7 @@ linear-history: false
 
 // Criterion 7: an unknown key or a bad value is a Problem with its line; the other settings
 // still apply.
-func TestTellsEachProblemByItsLine(t *testing.T) {
+func TestParse_TellsEachProblemByItsLine(t *testing.T) {
 	got, problems := Parse(`no-stale-adr-date: true
 no-secrets: true
 conventional-commits:
@@ -94,7 +94,7 @@ linear-history: false
 	}
 }
 
-func TestTellsAFileThatIsNoYAML(t *testing.T) {
+func TestParse_TellsAFileThatIsNoYAML(t *testing.T) {
 	_, problems := Parse("linear-history: true\nno-ai-coauthor: [\n")
 	if len(problems) != 1 || problems[0].Line == 0 {
 		t.Errorf("got %v, want one Problem with its line", problems)
@@ -106,7 +106,7 @@ func TestTellsAFileThatIsNoYAML(t *testing.T) {
 }
 
 // The JSON Schema editors complete the file with has the keys Parse takes, and no other.
-func TestSchemaHasTheSettingsKeys(t *testing.T) {
+func TestSchema_HasTheSettingsKeys(t *testing.T) {
 	text, err := os.ReadFile("../../schema.json")
 	if err != nil {
 		t.Fatal(err)
@@ -137,7 +137,7 @@ func TestSchemaHasTheSettingsKeys(t *testing.T) {
 }
 
 // YAML's own spellings of true and false, such as True, are booleans too.
-func TestTakesEachSpellingOfABoolean(t *testing.T) {
+func TestParse_TakesEachSpellingOfABoolean(t *testing.T) {
 	got, problems := Parse("no-ai-coauthor: True\nlinear-history: FALSE\nconventional-commits: {pr-title: TRUE}\n")
 	if problems != nil || !got.On("no-ai-coauthor") || got.On("linear-history") || !got.PRTitle {
 		t.Errorf("got %+v and %v, want no-ai-coauthor on, linear-history off, pr-title on", got, problems)

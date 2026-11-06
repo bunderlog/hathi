@@ -82,7 +82,7 @@ func push(ref, before, after string) map[string]any {
 var zero = strings.Repeat("0", 40)
 
 // Criterion 3: a pull request checks from the merge base of its base and head.
-func TestCIChecksAPullRequestFromTheMergeBase(t *testing.T) {
+func TestCI_ChecksAPullRequestFromTheMergeBase(t *testing.T) {
 	dir, _, _, tip, feature := clone(t)
 	second := gittest.Commit(t, dir, "feat: second")
 	got := ci(t, "pull_request", map[string]any{"pull_request": map[string]any{
@@ -95,7 +95,7 @@ func TestCIChecksAPullRequestFromTheMergeBase(t *testing.T) {
 
 // Criterion 4: with pr-title on, a title that is not a Conventional Commit fails; off, it is never
 // checked.
-func TestCIChecksThePullRequestTitleWithPRTitleOn(t *testing.T) {
+func TestCI_ChecksThePullRequestTitleWithPRTitleOn(t *testing.T) {
 	dir, _, _, tip, _ := clone(t)
 	event := map[string]any{"pull_request": map[string]any{
 		"title": "Add a feature", "base": map[string]any{"sha": tip}, "head": map[string]any{"sha": "feature"},
@@ -121,7 +121,7 @@ func TestCIChecksThePullRequestTitleWithPRTitleOn(t *testing.T) {
 
 // Criterion 3: a new branch checks its commits since the default branch, and a branch rebased onto
 // it isn't blamed for the commits and merges it brings.
-func TestCIChecksANewBranchSinceTheDefaultOne(t *testing.T) {
+func TestCI_ChecksANewBranchSinceTheDefaultOne(t *testing.T) {
 	dir, _, _, tip, _ := clone(t)
 	gittest.Git(t, dir, "checkout", "-q", "-B", "rebased", tip)
 	own := gittest.Commit(t, dir, "feat: own")
@@ -133,7 +133,7 @@ func TestCIChecksANewBranchSinceTheDefaultOne(t *testing.T) {
 
 // Criterion 3: after a force push, since the merge base of before and after, or since the default
 // branch where the checkout lacks before.
-func TestCIChecksAForcePush(t *testing.T) {
+func TestCI_ChecksAForcePush(t *testing.T) {
 	dir, base, _, _, feature := clone(t)
 	gittest.Git(t, dir, "checkout", "-q", "-B", "feature", base)
 	again := gittest.Commit(t, dir, "feat: again")
@@ -157,7 +157,7 @@ func TestCIChecksAForcePush(t *testing.T) {
 
 // Criterion 3: the default branch checks what lands on it, all of it on a first push, and exits 2
 // where the checkout lacks before.
-func TestCIChecksTheDefaultBranch(t *testing.T) {
+func TestCI_ChecksTheDefaultBranch(t *testing.T) {
 	dir, base, merge, tip, _ := clone(t)
 	gittest.Git(t, dir, "checkout", "-q", "main")
 	got := ci(t, "push", push("refs/heads/main", base, tip))
@@ -175,7 +175,7 @@ func TestCIChecksTheDefaultBranch(t *testing.T) {
 }
 
 // Criterion 3: a tag or a deletion checks nothing; any other event is a usage error.
-func TestCIChecksNothingForATagOrADeletion(t *testing.T) {
+func TestCI_ChecksNothingForATagOrADeletion(t *testing.T) {
 	_, _, _, tip, _ := clone(t)
 	for _, event := range []map[string]any{
 		push("refs/tags/v1.0.0", zero, tip), push("refs/heads/feature", tip, zero),
@@ -192,7 +192,7 @@ func TestCIChecksNothingForATagOrADeletion(t *testing.T) {
 }
 
 // Criterion 3: a shallow checkout, or a commit the checkout lacks, exits 2.
-func TestCIExits2WithoutTheHistory(t *testing.T) {
+func TestCI_Exits2WithoutTheHistory(t *testing.T) {
 	src, _, _, tip, feature := clone(t)
 	shallow := filepath.Join(t.TempDir(), "shallow")
 	gittest.Git(t, src, "clone", "-q", "--depth", "1", "file://"+src, shallow)

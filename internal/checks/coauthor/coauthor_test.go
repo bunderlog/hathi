@@ -17,7 +17,7 @@ func find(t *testing.T, message string) []checks.Finding {
 }
 
 // baloo: test_coauthor.py test_rejects_an_ai
-func TestRejectsAnAI(t *testing.T) {
+func TestCheck_RejectsAnAI(t *testing.T) {
 	for _, line := range []string{
 		"Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
 		"Co-authored-by: Claude <noreply@anthropic.com>",
@@ -49,7 +49,7 @@ func TestRejectsAnAI(t *testing.T) {
 }
 
 // baloo: test_coauthor.py test_accepts_a_person
-func TestAcceptsAPerson(t *testing.T) {
+func TestCheck_AcceptsAPerson(t *testing.T) {
 	for _, line := range []string{
 		"Co-authored-by: Jane Doe <jane@example.com>",
 		"Co-authored-by: Claude Dupont <claude@example.fr>",
@@ -68,7 +68,7 @@ func TestAcceptsAPerson(t *testing.T) {
 }
 
 // baloo: test_coauthor.py test_ignores_the_diff_below_the_scissors
-func TestIgnoresTheDiffBelowTheScissors(t *testing.T) {
+func TestCheck_IgnoresTheDiffBelowTheScissors(t *testing.T) {
 	message := "feat: x\n# ------------------------ >8 ------------------------\n" +
 		"+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n" +
 		"Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n"

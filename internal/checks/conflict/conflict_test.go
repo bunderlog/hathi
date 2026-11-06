@@ -33,7 +33,7 @@ func marker(line int) checks.Finding {
 }
 
 // baloo: test_conflict.py test_finds_each_marker_the_staged_changes_add
-func TestFindsEachMarkerTheStagedChangesAdd(t *testing.T) {
+func TestCheck_FindsEachMarkerTheStagedChangesAdd(t *testing.T) {
 	dir := gittest.Repo(t)
 	gittest.Stage(t, dir, map[string]string{
 		"a.go": "a\n" + open + " HEAD\nx \n" + middle + "\ny\n" + closing + " topic\n",
@@ -42,7 +42,7 @@ func TestFindsEachMarkerTheStagedChangesAdd(t *testing.T) {
 }
 
 // baloo: test_conflict.py test_passes_what_is_not_a_marker
-func TestPassesWhatIsNotAMarker(t *testing.T) {
+func TestCheck_PassesWhatIsNotAMarker(t *testing.T) {
 	dir := gittest.Repo(t)
 	gittest.Stage(t, dir, map[string]string{
 		"a.md":  "Title\n" + middle + "\n\ntrailing space \n",
@@ -54,7 +54,7 @@ func TestPassesWhatIsNotAMarker(t *testing.T) {
 // A file that holds markers on purpose passes with a longer conflict-marker-size in
 // .gitattributes, as Git's own check reads it.
 // baloo: test_conflict.py test_passes_a_file_with_a_longer_marker_size
-func TestPassesAFileWithALongerMarkerSize(t *testing.T) {
+func TestCheck_PassesAFileWithALongerMarkerSize(t *testing.T) {
 	dir := gittest.Repo(t)
 	gittest.Write(t, dir, ".gitattributes", "testdata/* conflict-marker-size=32\n")
 	gittest.Stage(t, dir, map[string]string{"testdata/merge.txt": open + " ours\n"})
@@ -62,12 +62,12 @@ func TestPassesAFileWithALongerMarkerSize(t *testing.T) {
 }
 
 // baloo: test_conflict.py test_passes_nothing_staged
-func TestPassesNothingStaged(t *testing.T) {
+func TestCheck_PassesNothingStaged(t *testing.T) {
 	expect(t, gittest.Repo(t))
 }
 
 // baloo: test_conflict.py test_fails_outside_a_repo
-func TestFailsOutsideARepo(t *testing.T) {
+func TestCheck_FailsOutsideARepo(t *testing.T) {
 	gittest.Isolate(t)
 	t.Setenv("GIT_CEILING_DIRECTORIES", os.TempDir())
 	if _, err := find(t.TempDir()); err == nil {
@@ -76,7 +76,7 @@ func TestFailsOutsideARepo(t *testing.T) {
 }
 
 // A commit's changes, as a range checks them, are read with the commit's own .gitattributes.
-func TestReadsACommitWithItsOwnAttributes(t *testing.T) {
+func TestCheck_ReadsACommitWithItsOwnAttributes(t *testing.T) {
 	dir := gittest.Repo(t)
 	gittest.Stage(t, dir, map[string]string{"a.go": open + " ours\n"})
 	commit := gittest.Commit(t, dir, "feat: a")
@@ -90,7 +90,7 @@ func TestReadsACommitWithItsOwnAttributes(t *testing.T) {
 }
 
 // A Git failure on a commit's changes names the subcommand that failed, past --attr-source.
-func TestNamesTheGitSubcommandThatFailed(t *testing.T) {
+func TestCheck_NamesTheGitSubcommandThatFailed(t *testing.T) {
 	dir := gittest.Repo(t)
 	_, err := find(dir + "/missing")
 	if err == nil || !strings.HasPrefix(err.Error(), "git diff: ") {

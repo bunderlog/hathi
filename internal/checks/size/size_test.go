@@ -26,7 +26,7 @@ func expect(t *testing.T, dir string, maxSize int, want ...checks.Finding) {
 }
 
 // baloo: test_size.py test_finds_an_added_file_over_the_limit
-func TestFindsAnAddedFileOverTheLimit(t *testing.T) {
+func TestCheck_FindsAnAddedFileOverTheLimit(t *testing.T) {
 	dir := gittest.Repo(t)
 	gittest.Stage(t, dir, map[string]string{
 		"bin/app": strings.Repeat("x", 3*1024+1), "small.go": strings.Repeat("x", 3*1024),
@@ -36,7 +36,7 @@ func TestFindsAnAddedFileOverTheLimit(t *testing.T) {
 
 // Without a limit of its own, a file may be 1 MB.
 // baloo: test_size.py test_limits_a_file_to_1_mb_by_default
-func TestLimitsAFileTo1MBByDefault(t *testing.T) {
+func TestCheck_LimitsAFileTo1MBByDefault(t *testing.T) {
 	dir := gittest.Repo(t)
 	gittest.Stage(t, dir, map[string]string{"a": strings.Repeat("x", 1024*1024)})
 	expect(t, dir, DefaultMaxSize)
@@ -46,7 +46,7 @@ func TestLimitsAFileTo1MBByDefault(t *testing.T) {
 
 // A file already committed passes when it changes or moves: it was let in once.
 // baloo: test_size.py test_passes_a_file_already_committed
-func TestPassesAFileAlreadyCommitted(t *testing.T) {
+func TestCheck_PassesAFileAlreadyCommitted(t *testing.T) {
 	dir := gittest.Repo(t)
 	big := strings.Repeat("x", 4*1024)
 	gittest.Stage(t, dir, map[string]string{"data.bin": big})
@@ -57,7 +57,7 @@ func TestPassesAFileAlreadyCommitted(t *testing.T) {
 }
 
 // baloo: test_size.py test_fails_outside_a_repo
-func TestFailsOutsideARepo(t *testing.T) {
+func TestCheck_FailsOutsideARepo(t *testing.T) {
 	gittest.Isolate(t)
 	t.Setenv("GIT_CEILING_DIRECTORIES", os.TempDir())
 	if _, err := find(t.TempDir(), DefaultMaxSize); err == nil {
@@ -67,7 +67,7 @@ func TestFailsOutsideARepo(t *testing.T) {
 
 // A commit's changes, as a range checks them, are against its parent, or nothing for a root
 // commit.
-func TestReadsACommitAgainstItsParent(t *testing.T) {
+func TestCheck_ReadsACommitAgainstItsParent(t *testing.T) {
 	dir := gittest.Repo(t)
 	gittest.Stage(t, dir, map[string]string{"a": strings.Repeat("x", 2048)})
 	root := gittest.Commit(t, dir, "feat: a")

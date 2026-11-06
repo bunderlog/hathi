@@ -34,7 +34,7 @@ func expect(t *testing.T, message string, rules Rules, want string) {
 }
 
 // baloo: test_commit.py test_accepts
-func TestAccepts(t *testing.T) {
+func TestCheck_Accepts(t *testing.T) {
 	for _, message := range []string{
 		"feat: add login",
 		"fix(adr): correct a date",
@@ -72,7 +72,7 @@ func TestAccepts(t *testing.T) {
 
 // The examples in the Conventional Commits 1.0.0 specification, with LF and with CRLF.
 // baloo: test_commit.py test_accepts_the_specs_examples
-func TestAcceptsTheSpecsExamples(t *testing.T) {
+func TestCheck_AcceptsTheSpecsExamples(t *testing.T) {
 	for _, message := range []string{
 		"feat: allow provided config object to extend other configs\n\nBREAKING CHANGE: " +
 			"`extends` key in config file is now used for extending other config files",
@@ -96,7 +96,7 @@ func TestAcceptsTheSpecsExamples(t *testing.T) {
 }
 
 // baloo: test_commit.py test_rejects_a_subject_of_another_shape
-func TestRejectsASubjectOfAnotherShape(t *testing.T) {
+func TestCheck_RejectsASubjectOfAnotherShape(t *testing.T) {
 	for _, message := range []string{
 		"add login", "fix bug: x", "feat:add login", "feat:  x", "feat(): x", "feat( ): x",
 		"feat (a): x", "feat: ", "Merge sort for the index",
@@ -109,7 +109,7 @@ func TestRejectsASubjectOfAnotherShape(t *testing.T) {
 
 // commitlint's config-conventional error rules.
 // baloo: test_commit.py test_rejects_what_commitlint_does
-func TestRejectsWhatCommitlintDoes(t *testing.T) {
+func TestCheck_RejectsWhatCommitlintDoes(t *testing.T) {
 	x, y := strings.Repeat("x", 34), strings.Repeat("y", 40)
 	for _, c := range []struct{ message, want string }{
 		{"wip: any type", `"wip" ` + notOneOf},
@@ -132,7 +132,7 @@ func TestRejectsWhatCommitlintDoes(t *testing.T) {
 }
 
 // baloo: test_commit.py test_rejects_a_breaking_change_footer_of_another_shape
-func TestRejectsABreakingChangeFooterOfAnotherShape(t *testing.T) {
+func TestCheck_RejectsABreakingChangeFooterOfAnotherShape(t *testing.T) {
 	for _, footer := range []string{
 		"Breaking-Change: x", "breaking-change: x", "BREAKING CHANGE #12", "BREAKING-CHANGE #12",
 	} {
@@ -147,7 +147,7 @@ func TestRejectsABreakingChangeFooterOfAnotherShape(t *testing.T) {
 }
 
 // baloo: test_commit.py test_takes_its_own_types_or_any
-func TestTakesItsOwnTypesOrAny(t *testing.T) {
+func TestCheck_TakesItsOwnTypesOrAny(t *testing.T) {
 	own := Rules{Types: []string{"wip", "feat"}, MaxLength: 100}
 	anyType := Rules{MaxLength: 100}
 	expect(t, "wip: x", own, "")
@@ -157,7 +157,7 @@ func TestTakesItsOwnTypesOrAny(t *testing.T) {
 }
 
 // baloo: test_commit.py test_takes_its_own_line_length_or_none
-func TestTakesItsOwnLineLengthOrNone(t *testing.T) {
+func TestCheck_TakesItsOwnLineLengthOrNone(t *testing.T) {
 	at := func(n int) Rules { return Rules{Types: Types, MaxLength: n} }
 	expect(t, "feat: "+strings.Repeat("x", 67), at(72),
 		`"feat: `+strings.Repeat("x", 34)+`…" is 73 characters, over 72`)
@@ -167,7 +167,7 @@ func TestTakesItsOwnLineLengthOrNone(t *testing.T) {
 }
 
 // No test in `baloo`, which has no scopes: they match as commitlint's scope-enum matches them.
-func TestTakesItsOwnScopesOrAny(t *testing.T) {
+func TestCheck_TakesItsOwnScopesOrAny(t *testing.T) {
 	own := Rules{Types: Types, Scopes: []string{"api", "ui", "a,b"}, MaxLength: 100}
 	for _, message := range []string{
 		"feat: no scope", "feat(api): x", "feat(api,ui): x", "feat(api, ui): x", "feat(api/ui): x",

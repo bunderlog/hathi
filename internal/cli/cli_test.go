@@ -43,7 +43,7 @@ func expect(t *testing.T, got result, code int, stderr string) {
 }
 
 // Criterion 1.
-func TestCommitMsgFailsAMessageWithALinePerFailure(t *testing.T) {
+func TestCommitMsg_FailsAMessageWithALinePerFailure(t *testing.T) {
 	dir := repo(t)
 	message := "add login\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n"
 	want := "conventional-commits: \"add login\" is not `type(scope): description`; " +
@@ -56,7 +56,7 @@ func TestCommitMsgFailsAMessageWithALinePerFailure(t *testing.T) {
 }
 
 // Criterion 1.
-func TestCommitMsgPassesAMessageQuietly(t *testing.T) {
+func TestCommitMsg_PassesAMessageQuietly(t *testing.T) {
 	dir := repo(t)
 	message := "feat: add login\n\nCo-authored-by: Jane Doe <jane@example.com>\n"
 	gittest.Write(t, dir, "MSG", message)
@@ -65,7 +65,7 @@ func TestCommitMsgPassesAMessageQuietly(t *testing.T) {
 }
 
 // Criterion 2.
-func TestPreCommitChecksTheStagedChanges(t *testing.T) {
+func TestPreCommit_ChecksTheStagedChanges(t *testing.T) {
 	dir := repo(t)
 	gittest.Stage(t, dir, map[string]string{"a.go": "ok\n"})
 	expect(t, hathi("", "check", "pre-commit"), 0, "")
@@ -77,7 +77,7 @@ func TestPreCommitChecksTheStagedChanges(t *testing.T) {
 }
 
 // Criterion 2: with or without <remote> <url>, whatever they are.
-func TestPrePushChecksThePushedRefs(t *testing.T) {
+func TestPrePush_ChecksThePushedRefs(t *testing.T) {
 	dir := repo(t)
 	base := gittest.Commit(t, dir, "feat: base")
 	gittest.Git(t, dir, "checkout", "-q", "-b", "side")
@@ -117,7 +117,7 @@ func rangeRepo(t *testing.T) (dir, base, adds, removes, merge string) {
 
 // Criterion 3: each commit's message and changes, and its merge commits; a Secret one commit adds
 // and the next removes fails.
-func TestRangeChecksEachCommit(t *testing.T) {
+func TestRange_ChecksEachCommit(t *testing.T) {
 	_, base, adds, removes, merge := rangeRepo(t)
 	expect(t, hathi("", "check", "--range", base+"..main"), 1,
 		adds[:12]+" no-secrets-in-commits: a.go:1: an AWS access key; "+
@@ -128,7 +128,7 @@ func TestRangeChecksEachCommit(t *testing.T) {
 }
 
 // Criterion 5: one JSON object per Verdict, passing ones too.
-func TestRangePrintsEachVerdictInJSON(t *testing.T) {
+func TestRange_PrintsEachVerdictInJSON(t *testing.T) {
 	_, base, adds, _, _ := rangeRepo(t)
 	got := hathi("", "check", "--range", base+".."+adds, "--format", "json")
 	var verdicts []map[string]any
@@ -159,7 +159,7 @@ func TestRangePrintsEachVerdictInJSON(t *testing.T) {
 
 // Criterion 7: over a range, a commit whose .hathi.yml turns a Check off is checked with it off,
 // and the commits before it with it on.
-func TestRangeChecksEachCommitWithItsOwnSettings(t *testing.T) {
+func TestRange_ChecksEachCommitWithItsOwnSettings(t *testing.T) {
 	dir := repo(t)
 	base := gittest.Commit(t, dir, "feat: base")
 	before := gittest.Commit(t, dir, "Before")
@@ -172,7 +172,7 @@ func TestRangeChecksEachCommitWithItsOwnSettings(t *testing.T) {
 }
 
 // Criterion 6.
-func TestUsageErrorsExit2(t *testing.T) {
+func TestRun_Exits2OnAUsageError(t *testing.T) {
 	repo(t)
 	for _, args := range [][]string{
 		{}, {"check"}, {"check", "commit-msg"}, {"check", "commit-msg", "a", "b"},
@@ -195,7 +195,7 @@ func TestUsageErrorsExit2(t *testing.T) {
 }
 
 // Criterion 6: a Check that can't check exits 2.
-func TestCantCheckExits2(t *testing.T) {
+func TestCheck_Exits2WhereACheckCantCheck(t *testing.T) {
 	repo(t)
 	expect(t, hathi("", "check", "commit-msg", "missing"), 2,
 		"hathi: open missing: no such file or directory\n")
@@ -210,7 +210,7 @@ func TestCantCheckExits2(t *testing.T) {
 }
 
 // Criterion 6: --only runs a Check the settings turn off, --skip leaves one out.
-func TestOnlyAndSkip(t *testing.T) {
+func TestCheck_OnlyAndSkipPickTheChecks(t *testing.T) {
 	dir := repo(t)
 	gittest.Write(t, dir, ".hathi.yml", "conventional-commits: false\n")
 	bad := "Add login\n\nGenerated with Claude Code\n"
@@ -223,7 +223,7 @@ func TestOnlyAndSkip(t *testing.T) {
 }
 
 // Criterion 7.
-func TestSettingsComeFromTheRootOrConfig(t *testing.T) {
+func TestCheck_TakesSettingsFromTheRootOrConfig(t *testing.T) {
 	dir := repo(t)
 	gittest.Write(t, dir, ".hathi.yml", "conventional-commits: {types: [wip]}\n")
 	gittest.Write(t, dir, "ci.yml", "conventional-commits: false\n")
@@ -237,7 +237,7 @@ func TestSettingsComeFromTheRootOrConfig(t *testing.T) {
 }
 
 // Criterion 7: hathi config --default prints exactly the defaults.
-func TestConfigDefaultPrintsTheDefaults(t *testing.T) {
+func TestConfig_DefaultPrintsTheDefaults(t *testing.T) {
 	got := hathi("", "config", "--default")
 	s, problems := settings.Parse(got.stdout)
 	if got.code != 0 || problems != nil || len(s.Off) > 0 ||
@@ -247,7 +247,7 @@ func TestConfigDefaultPrintsTheDefaults(t *testing.T) {
 }
 
 // Criterion 5: annotations by default in GitHub Actions.
-func TestGitHubAnnotations(t *testing.T) {
+func TestCheck_AnnotatesInGitHubActions(t *testing.T) {
 	dir := repo(t)
 	t.Setenv("GITHUB_ACTIONS", "true")
 	gittest.Stage(t, dir, map[string]string{"a,b.go": "key := " + aws + "\n"})
@@ -266,7 +266,7 @@ func TestGitHubAnnotations(t *testing.T) {
 }
 
 // Criterion 8.
-func TestListAndDoctorChangeNothing(t *testing.T) {
+func TestListAndDoctor_ChangeNothing(t *testing.T) {
 	dir := repo(t)
 	gittest.Commit(t, dir, "feat: x")
 	gittest.Write(t, dir, ".hathi.yml", "linear-history: false\n")
@@ -286,7 +286,7 @@ func TestListAndDoctorChangeNothing(t *testing.T) {
 }
 
 // Criterion 8: doctor exits 0 when it reports no problem, 2 when one is in the settings.
-func TestDoctorFindsTheGitHooks(t *testing.T) {
+func TestDoctor_FindsTheGitHooks(t *testing.T) {
 	dir := repo(t)
 	gittest.Write(t, dir, ".hathi.yml", "no-ai-coauthor: false\n")
 	hooks := filepath.Join(dir, ".git", "hooks")
@@ -319,7 +319,7 @@ func TestDoctorFindsTheGitHooks(t *testing.T) {
 	}
 }
 
-func TestDoctorComparesTheVersionWithItsPin(t *testing.T) {
+func TestDoctor_ComparesTheVersionWithItsPin(t *testing.T) {
 	for _, c := range []struct {
 		mise, running string
 		problem       bool
@@ -353,7 +353,7 @@ func TestDoctorComparesTheVersionWithItsPin(t *testing.T) {
 }
 
 // Criterion 12.
-func TestVersion(t *testing.T) {
+func TestVersion_PrintsItWithoutTheV(t *testing.T) {
 	for _, args := range [][]string{{"version"}, {"--version"}} {
 		t.Run(args[0], func(t *testing.T) {
 			var stdout strings.Builder
@@ -364,7 +364,7 @@ func TestVersion(t *testing.T) {
 	}
 }
 
-func TestExplainsEachCheck(t *testing.T) {
+func TestExplain_DescribesEachCheck(t *testing.T) {
 	for _, name := range settings.Checks {
 		t.Run(name, func(t *testing.T) {
 			if got := hathi("", "explain", name); got.code != 0 || !strings.HasPrefix(got.stdout, name+" (") {
@@ -374,7 +374,7 @@ func TestExplainsEachCheck(t *testing.T) {
 	}
 }
 
-func TestTheChecksAreTheSettingsKeys(t *testing.T) {
+func TestAll_AreTheSettingsKeys(t *testing.T) {
 	var names []string
 	for _, c := range all(settings.Default()) {
 		names = append(names, c.Name)
@@ -385,7 +385,7 @@ func TestTheChecksAreTheSettingsKeys(t *testing.T) {
 }
 
 // Criterion 9: no color codes, whatever the format.
-func TestPrintsNoColor(t *testing.T) {
+func TestCheck_PrintsNoColor(t *testing.T) {
 	repo(t)
 	for _, f := range []string{"text", "json", "github"} {
 		t.Run(f, func(t *testing.T) {
@@ -399,7 +399,7 @@ func TestPrintsNoColor(t *testing.T) {
 
 // Criterion 3: where Git can't read a commit's settings, the range exits 2 rather than checking
 // the commit with the defaults.
-func TestRangeExits2WhereGitCantReadACommit(t *testing.T) {
+func TestRange_Exits2WhereGitCantReadACommit(t *testing.T) {
 	dir := repo(t)
 	base := gittest.Commit(t, dir, "feat: base")
 	gittest.Stage(t, dir, map[string]string{"a.go": "x\n"})

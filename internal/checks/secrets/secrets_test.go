@@ -50,7 +50,7 @@ func expect(t *testing.T, got []checks.Finding, want ...checks.Finding) {
 }
 
 // baloo: test_secrets.py test_finds_each_kind
-func TestFindsEachKind(t *testing.T) {
+func TestCheck_FindsEachKind(t *testing.T) {
 	for _, f := range fakes {
 		t.Run(f.what+" "+f.secret[:12], func(t *testing.T) {
 			dir := gittest.Repo(t)
@@ -61,7 +61,7 @@ func TestFindsEachKind(t *testing.T) {
 }
 
 // baloo: test_secrets.py test_passes_what_is_no_secret
-func TestPassesWhatIsNoSecret(t *testing.T) {
+func TestCheck_PassesWhatIsNoSecret(t *testing.T) {
 	dir := gittest.Repo(t)
 	lines := []string{
 		"sk-learn is a library",
@@ -84,7 +84,7 @@ func TestPassesWhatIsNoSecret(t *testing.T) {
 
 // No output holds the Secret (PRD, criterion 10): a Finding has its place and its kind only.
 // baloo: test_secrets.py test_never_reports_the_secret
-func TestNeverReportsTheSecret(t *testing.T) {
+func TestCheck_NeverReportsTheSecret(t *testing.T) {
 	dir := gittest.Repo(t)
 	gittest.Stage(t, dir, map[string]string{"a.go": aws})
 	for _, f := range find(t, dir) {
@@ -95,7 +95,7 @@ func TestNeverReportsTheSecret(t *testing.T) {
 }
 
 // baloo: test_secrets.py test_passes_a_line_marked_allow_secret
-func TestPassesALineMarkedAllowSecret(t *testing.T) {
+func TestCheck_PassesALineMarkedAllowSecret(t *testing.T) {
 	dir := gittest.Repo(t)
 	gittest.Stage(t, dir, map[string]string{
 		"a.go": aws + " // hathi:allow-secret\n" + aws + "\n" + aws + " // baloo:allow-secret\n",
@@ -105,7 +105,7 @@ func TestPassesALineMarkedAllowSecret(t *testing.T) {
 
 // Only lines the staged changes add count, by their line in the staged file.
 // baloo: test_secrets.py test_finds_only_added_lines
-func TestFindsOnlyAddedLines(t *testing.T) {
+func TestCheck_FindsOnlyAddedLines(t *testing.T) {
 	dir := gittest.Repo(t)
 	lines := strings.Split(strings.Repeat("ok\n", 12), "\n")
 	lines[2] = aws
@@ -122,7 +122,7 @@ func TestFindsOnlyAddedLines(t *testing.T) {
 }
 
 // baloo: test_secrets.py test_finds_env_files_but_not_their_templates
-func TestFindsEnvFilesButNotTheirTemplates(t *testing.T) {
+func TestCheck_FindsEnvFilesButNotTheirTemplates(t *testing.T) {
 	dir := gittest.Repo(t)
 	files := map[string]string{}
 	for _, path := range []string{
@@ -140,7 +140,7 @@ func TestFindsEnvFilesButNotTheirTemplates(t *testing.T) {
 
 // An Env file marked on its first line passes, and its lines are still looked through.
 // baloo: test_secrets.py test_passes_an_env_file_marked_on_its_first_line
-func TestPassesAnEnvFileMarkedOnItsFirstLine(t *testing.T) {
+func TestCheck_PassesAnEnvFileMarkedOnItsFirstLine(t *testing.T) {
 	dir := gittest.Repo(t)
 	gittest.Stage(t, dir, map[string]string{
 		".env":  "# public defaults, hathi:allow-secret\nPORT=3000\n",
@@ -158,7 +158,7 @@ func TestPassesAnEnvFileMarkedOnItsFirstLine(t *testing.T) {
 // The Check's own files hold no Secret, so a repo that commits them passes: `hathi`'s files here,
 // where `baloo`'s test stages `baloo`'s.
 // baloo: test_secrets.py test_passes_its_own_files
-func TestPassesItsOwnFiles(t *testing.T) {
+func TestCheck_PassesItsOwnFiles(t *testing.T) {
 	dir := gittest.Repo(t)
 	files := map[string]string{}
 	for _, name := range []string{"secrets.go", "secrets_test.go"} {
@@ -173,7 +173,7 @@ func TestPassesItsOwnFiles(t *testing.T) {
 }
 
 // baloo: test_secrets.py test_fails_outside_a_repo
-func TestFailsOutsideARepo(t *testing.T) {
+func TestCheck_FailsOutsideARepo(t *testing.T) {
 	gittest.Isolate(t)
 	t.Setenv("GIT_CEILING_DIRECTORIES", os.TempDir())
 	_, err := Check.Find(checks.Input{Changes: checks.Changes{Repo: checks.Repo{Dir: t.TempDir()}}})
@@ -186,7 +186,7 @@ func TestFailsOutsideARepo(t *testing.T) {
 // mask_secrets, which only `baloo`'s Hooks use, to keep Secrets out of Claude's context.
 
 // A path with a space, or one Git quotes, is named as it is.
-func TestNamesAPathAsItIs(t *testing.T) {
+func TestCheck_NamesAPathAsItIs(t *testing.T) {
 	dir := gittest.Repo(t)
 	gittest.Stage(t, dir, map[string]string{"a b.txt": aws + "\n", `a"b.txt`: aws + "\n"})
 	expect(t, find(t, dir),
