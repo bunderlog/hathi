@@ -30,7 +30,15 @@ type Input struct {
 	Message string  // the commit message, for a commit-msg Check, as Git wrote it to its file
 	Changes Changes // the changes, for a pre-commit Check
 	Pushed  string  // the pushed refs, for a pre-push Check, as Git gives them on stdin
+	Range   *Range  // the Range, for a pre-push Check over one instead of the pushed refs
 	Repo    Repo    // the repo, for a pre-push Check
+}
+
+// A Range is the commits `hathi check ci` or `--range` checks (glossary).
+type Range struct {
+	Head string   // its head
+	From string   // the commit it starts after; "" for the root
+	Not  []string // what it leaves out, as what the default branch already has
 }
 
 // A Finding is one thing a Check fails on: where, when the Check names a place, and why.

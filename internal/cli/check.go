@@ -286,7 +286,6 @@ func (r *runner) commits(from, head string, not []string, title *string) int {
 		return r.code
 	}
 	headID = strings.TrimSpace(headID)
-	merges := 0
 	for line := range strings.Lines(list) {
 		fields := strings.Fields(line)
 		id, at := fields[0], Verdict{Commit: fields[0][:12]}
@@ -303,14 +302,7 @@ func (r *runner) commits(from, head string, not []string, title *string) int {
 			r.run(c, checks.Input{Message: message}, at)
 		}
 		if len(fields) > 2 {
-			// Its parents brought its changes.
-			merges++
-			if r.runs(s, "linear-history") {
-				r.out.verdict(Verdict{
-					Check: "linear-history", Fail: true, Commit: at.Commit, Reason: headID[:12],
-				})
-				r.code = max(r.code, 1)
-			}
+			// Its parents brought its changes; the pre-push Checks look at it below.
 			continue
 		}
 		parent := ""
@@ -329,8 +321,9 @@ func (r *runner) commits(from, head string, not []string, title *string) int {
 	if err != nil {
 		return r.code
 	}
-	if merges == 0 && r.runs(s, "linear-history") {
-		r.out.verdict(Verdict{Check: "linear-history"})
+	whole := checks.Input{Repo: r.repo, Range: &checks.Range{Head: headID, From: from, Not: not}}
+	for _, c := range r.selected(s, "pre-push") {
+		r.run(c, whole, Verdict{})
 	}
 	if title != nil && s.PRTitle && r.runs(s, "conventional-commits") {
 		r.run(commit.Check(s.Commit), checks.Input{Message: *title}, Verdict{PRTitle: true})

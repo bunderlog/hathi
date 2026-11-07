@@ -165,3 +165,29 @@ func TestCheck_FailsOnACommitNotHere(t *testing.T) {
 		t.Error("got no error for a commit not here")
 	}
 }
+
+// Over a Range, each merge commit in it fails, by its head; one starting after the merge, or
+// leaving out what has it, passes.
+func TestCheck_FindsEachMergeInARange(t *testing.T) {
+	dir, base, merge, after := history(t)
+	inRange := func(from string, not ...string) []checks.Finding {
+		t.Helper()
+		got, err := Check.Find(checks.Input{
+			Repo: checks.Repo{Dir: dir}, Range: &checks.Range{Head: after, From: from, Not: not},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return got
+	}
+	want := []checks.Finding{{Commit: merge[:12], Reason: after[:12]}}
+	if got := inRange(base); !slices.Equal(got, want) {
+		t.Errorf("got %v, want %v", got, want)
+	}
+	if got := inRange(merge); len(got) > 0 {
+		t.Errorf("got %v from the merge on, want none", got)
+	}
+	if got := inRange(base, merge); len(got) > 0 {
+		t.Errorf("got %v leaving out the merge, want none", got)
+	}
+}
