@@ -25,6 +25,7 @@ var kinds = []struct {
 	{"an AWS access key", regexp.MustCompile(`\b(?:AKIA|ASIA|ABIA|ACCA)[A-Z2-7]{16}\b`)},
 	{"a GitHub token", regexp.MustCompile(`\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{60,})`)},
 	{"a Cloudflare token", regexp.MustCompile(`\bcf(?:k|ut|at)_[A-Za-z0-9]{40}[a-f0-9]{8}\b`)},
+	{"an Atlassian API token", regexp.MustCompile(`\bATATT3[A-Za-z0-9_=-]{178}[A-F0-9]{8}\b`)},
 	{"a GitLab token", regexp.MustCompile(
 		`\bgl(?:pat|dt|rt|cbt|ptt|ft|imt|agent|oas|soat|ffct)-[0-9A-Za-z_.-]{20,}`)},
 	{"a Slack webhook URL", regexp.MustCompile(
@@ -242,8 +243,8 @@ const base62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 // checksumHolds reports whether a token that ends in a checksum ends in the right one (ADR
 // secrets): a classic GitHub token or an npm one in the CRC32 of its 30 random characters in
-// base62, padded to 6 with 0, and a Cloudflare one in the CRC32 of its 40 in hex. A match of
-// another kind holds.
+// base62, padded to 6 with 0, a Cloudflare one in the CRC32 of its 40 in hex, and an Atlassian one
+// in the CRC32 of all before it in upper-case hex. A match of another kind holds.
 func checksumHolds(match string) bool {
 	switch {
 	case (strings.HasPrefix(match, "ghp_") || strings.HasPrefix(match, "npm_")) && len(match) == 40:
@@ -254,6 +255,8 @@ func checksumHolds(match string) bool {
 			sum /= 62
 		}
 		return match[34:] == string(want)
+	case strings.HasPrefix(match, "ATATT3") && len(match) == 192:
+		return match[184:] == fmt.Sprintf("%08X", crc32.ChecksumIEEE([]byte(match[:184])))
 	case cloudflare.MatchString(match):
 		body, sum := match[len(match)-48:len(match)-8], match[len(match)-8:]
 		return sum == fmt.Sprintf("%08x", crc32.ChecksumIEEE([]byte(body)))

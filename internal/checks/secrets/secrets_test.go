@@ -23,6 +23,8 @@ var fakes = []struct{ what, secret string }{
 	// Cloudflare's last 8 characters are the hex CRC32 of the 40 before them, worked out apart.
 	{"a Cloudflare token", "cfut_" + "Q8wE2rT6yU1iO5pA9sD3fG7hJ4kL0zX2cV6bN8mQ" + "a25c625c"},
 	{"a Cloudflare token", "cfk_" + "M3nB7vC1xZ5lK9jH2gF6dS0aP4oI8uY3tR7eW1qA" + "9e0665fc"},
+	// Atlassian's last 8 characters are the hex CRC32 of all before them, worked out apart.
+	{"an Atlassian API token", "ATATT3" + atlassian + "B0BA09DD"},
 	{"a GitLab token", "glpat-" + strings.Repeat("a1B2c", 4)},
 	{"a Slack token", "xoxb-" + "1234567890-abc"},
 	{"a Slack token", "xapp-" + "1-A0B1C2D3E4F-123"},
@@ -81,6 +83,9 @@ var fakes = []struct{ what, secret string }{
 	{"a password in a URL", "cfg://u:" + "hunter2" + "@h"},
 }
 
+// An Atlassian API token's body between its prefix and its checksum.
+var atlassian = strings.Repeat("Kp8Wq2Lr6Tz1Vb5Xc9Md3Gf7Js0Hn4", 6)[:177] + "="
+
 // A UUID, as webhook URLs hold them.
 const uuid = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
 
@@ -134,6 +139,7 @@ func TestCheck_PassesWhatIsNoSecret(t *testing.T) {
 		"cfut_" + "Q8wE2rT6yU1iO5pA9sD3fG7hJ4kL0zX2cV6bN8mQ" + "a25c625d", // a25c625c
 		"npm_" + strings.Repeat("0", 36),
 		"npm_" + "Pq3Rs7Tu1Vw5Xy9Za2Bc6De0Fg4Hi8" + "2Cbhyk", // its checksum is 2Cbhyj
+		"ATATT3" + atlassian + "B0BA09DE",                    // B0BA09DD
 		"sk-proj-" + strings.Repeat("a1B2", 10),
 		"AKIA" + strings.Repeat("Z7Q8", 4),
 		// A certificate in base64, as a kubeconfig's certificate-authority-data holds it.

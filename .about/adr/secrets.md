@@ -30,6 +30,10 @@ in 8 lowercase hex digits. Cloudflare documents the three formats and a CRC32 su
 `cfat_` token confirmed the encoding on 2026-11-07, so all three are checked and one whose checksum
 fails passes.
 
+An Atlassian API token (`ATATT3`, 192 characters) ends in the CRC32 of all 184 before it in 8
+upper-case hex digits, which a real token confirmed on 2026-11-07; one whose checksum fails
+passes.
+
 A project that adds gitleaks keeps `no-secrets-in-commits` on: gitleaks doesn't flag an Env file by
 its name. A Secret both find is reported twice. `gitleaks:allow` marks a false alarm for `hathi`
 too, so one mark serves both; gitleaks takes only its own.

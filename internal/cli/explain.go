@@ -40,12 +40,12 @@ changes add and for an Env file they add or change, such as .env, .env.local or 
 template of one (.example, .sample, .template, .dist) passes. A Secret is a private key with its
 body, in PEM, PGP or base64; a key or token with a prefix of its own from AWS, GitHub, GitLab,
 Slack, Stripe (live), Anthropic, OpenAI, OpenRouter, Groq, xAI, Replicate, Perplexity, LangSmith,
-Pinecone, Google, Cloudflare, npm, PyPI, Docker Hub, Hugging Face, SendGrid, DigitalOcean,
-Shopify, Vault, age, Telegram, Supabase, Sentry, Fly.io, Linear, Notion, Figma, Doppler,
-1Password, Heroku, Terraform Cloud, Pulumi, Postman, New Relic or Databricks; a webhook signing
-secret; a Slack, Discord or Microsoft Teams webhook URL; a JWT; a password in a URL. A placeholder
-passes, such as AWS's documented example key, one of x's, or a GitHub, npm or Cloudflare token
-whose checksum fails. It names where, never the Secret itself.
+Pinecone, Google, Cloudflare, Atlassian, npm, PyPI, Docker Hub, Hugging Face, SendGrid,
+DigitalOcean, Shopify, Vault, age, Telegram, Supabase, Sentry, Fly.io, Linear, Notion, Figma,
+Doppler, 1Password, Heroku, Terraform Cloud, Pulumi, Postman, New Relic or Databricks; a webhook
+signing secret; a Slack, Discord or Microsoft Teams webhook URL; a JWT; a password in a URL. A
+placeholder passes, such as AWS's documented example key, one of x's, or a GitHub, npm,
+Cloudflare or Atlassian token whose checksum fails. It names where, never the Secret itself.
 
 To fix it, remove the Secret from the change and keep it in the environment or a secret store;
 one already pushed is out, so revoke it too. Keep an Env file out of Git, or commit a template.
