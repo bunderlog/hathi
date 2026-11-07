@@ -1,6 +1,6 @@
 # hathi finds a few kinds of Secret, and gitleaks beside it finds the rest
 
-Date: 2026-11-06
+Date: 2026-11-07
 
 `no-secrets-in-commits` finds Env files by their name, and Secrets of a kind with a published
 format whose prefix hardly ever matches anything else (`AKIA`, `ghp_`, `sk-ant-`). A new kind is
@@ -8,6 +8,12 @@ added only on those terms; entropy and generic rules, such as gitleaks' `generic
 not. A project that needs deeper scanning runs gitleaks beside `hathi`, in its own Git hooks and
 CI: `hathi` neither runs gitleaks nor links it, so a commit gets the same Verdict on every machine
 and the binary keeps its few dependencies.
+
+A match is a Secret only if it isn't a placeholder: one holding `example`, `sample`, `xxxxxx`,
+`aaaaaa`, `abcde`, `00000` or `*****`, in any case, passes, as trufflehog's filter does, so AWS's
+documented example key (`AKIA…EXAMPLE`) and a `ghp_xxxx…` in docs or tests pass. Where a kind's
+format has a marker of its own, the pattern asks for it: OpenAI's `T3BlbkFJ`, AWS's base32
+alphabet, and a private key's body after its `BEGIN` line, not the line alone.
 
 A project that adds gitleaks keeps `no-secrets-in-commits` on: gitleaks doesn't flag an Env file by
 its name. A Secret both find is reported twice. `gitleaks:allow` marks a false alarm for `hathi`
@@ -22,6 +28,10 @@ too, so one mark serves both; gitleaks takes only its own.
   and some 200 rules to keep in step.
 - Only the kinds `baloo` v0.34.0 finds — a new provider's key would pass wherever gitleaks doesn't
   run.
+- An entropy threshold on a prefixed match, as gitleaks sets even on `ghp_`, to drop placeholders —
+  the list of placeholders drops them too, and says why a match passed.
+- Checking a token with its issuer's API, as trufflehog does — it needs the network, so the Verdict
+  would depend on where `hathi` runs.
 
 ## Consequences
 

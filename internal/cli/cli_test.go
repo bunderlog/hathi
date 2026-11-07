@@ -12,7 +12,7 @@ import (
 )
 
 // A Secret built at run time, so this file holds none.
-var aws = "AKIA" + "IOSFODNN7EXAMPLE"
+var aws = "AKIA" + strings.Repeat("Z7Q2", 4)
 
 // repo makes a repo of its own for the test and runs the test in it, outside GitHub Actions.
 func repo(t *testing.T) string {

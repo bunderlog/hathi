@@ -14,20 +14,40 @@ import (
 // A fake Secret of each kind, built at run time, so this file holds none and passes the Check
 // itself.
 var fakes = []struct{ what, secret string }{
-	{"a private key", "-----BEGIN RSA " + "PRIVATE KEY-----"},
-	{"a private key", "-----BEGIN " + "PRIVATE KEY-----"},
-	{"an AWS access key", "AKIA" + "IOSFODNN7EXAMPLE"},
+	{"a private key", "-----BEGIN RSA " + "PRIVATE KEY-----\\n" + body},
+	{"a private key", "-----BEGIN " + "PRIVATE KEY-----\\n" + body},
+	{"an AWS access key", "AKIA" + strings.Repeat("Z7Q2", 4)},
 	{"a GitHub token", "ghp_" + strings.Repeat("a1", 18)},
 	{"a GitHub token", "github_pat_" + strings.Repeat("A_b1", 16)},
+	{"a GitLab token", "glpat-" + strings.Repeat("a1B2c", 4)},
 	{"a Slack token", "xoxb-" + "1234567890-abc"},
+	{"a Slack token", "xapp-" + "1-A0B1C2D3E4F-123"},
+	{"a Slack webhook URL", "https://hooks.slack" + ".com/services/T0B1C2D3E/B4F5G6H7I/" +
+		strings.Repeat("a1B2", 6)},
 	{"a Stripe live key", "sk_live_" + strings.Repeat("a1B2", 6)},
-	{"an Anthropic API key", "sk-ant-" + strings.Repeat("api03-", 4)},
-	{"an OpenAI API key", "sk-proj-" + strings.Repeat("a1B2", 6)},
+	{"an Anthropic API key", "sk-ant-" + "api03-" + strings.Repeat("a1B2c3", 8)},
+	{"an OpenAI API key", "sk-proj-" + strings.Repeat("a1B2", 6) + "T3Blbk" + "FJ" +
+		strings.Repeat("c3D4", 6)},
 	{"a Google API key", "AIza" + strings.Repeat("Sy", 17) + "x"},
+	{"an npm token", "npm_" + strings.Repeat("a1B2c3", 6)},
+	{"a PyPI token", "pypi-AgEIcHlw" + "aS5vcmc" + strings.Repeat("a1B2c3", 9)},
+	{"a Docker Hub token", "dckr_pat_" + strings.Repeat("a1B2c3", 5)},
+	{"a Hugging Face token", "hf_" + strings.Repeat("qWeRtYzU", 5)[:34]},
+	{"a SendGrid API key", "SG." + strings.Repeat("a1B2c3D", 4)[:22] + "." +
+		strings.Repeat("e5F6g7H", 7)[:43]},
+	{"a DigitalOcean token", "dop_v1_" + strings.Repeat("a1b2c3d4", 8)},
+	{"a Shopify token", "shpat_" + strings.Repeat("a1b2c3d4", 4)},
+	{"a Vault token", "hvs." + strings.Repeat("a1B2c3", 16)},
+	{"an age secret key", "AGE-SECRET-" + "KEY-1" +
+		strings.Repeat("QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L", 2)[:58]},
+	{"a Telegram bot token", "123456789" + ":A" + strings.Repeat("a1B2c3D4e5", 4)[:34]},
 	{"a JWT", "eyJ" + "hbGciOiJIUzI1NiJ9.eyJ" + "zdWIiOiIxMjM0NTY3ODkwIn0." + strings.Repeat("Sf", 20)},
 	{"a password in a URL", "ftp://dm:" + "hunter2-Pass" + "@10.0.0.1/devices"},
 	{"a password in a URL", "redis://:" + "hunter2" + "@cache:6379"},
 }
+
+// A private key's body, base64 as PEM has it.
+var body = strings.Repeat("MIIEvQIBADANBgkqhkiG9w0B", 3)
 
 var aws = fakes[2].secret
 
@@ -67,7 +87,14 @@ func TestCheck_PassesWhatIsNoSecret(t *testing.T) {
 		"sk-learn is a library",
 		"re := regexp.MustCompile(`AKIA[0-9A-Z]{16}`)",
 		"-----BEGIN PUBLIC KEY-----",
+		"-----BEGIN " + "PRIVATE KEY-----",
 		"ghp_short",
+		// Placeholders, and a match without its kind's marker.
+		"AKIA" + "IOSFODNN7EXAMPLE",
+		"ghp_" + strings.Repeat("x", 36),
+		"npm_" + strings.Repeat("0", 36),
+		"sk-proj-" + strings.Repeat("a1B2", 10),
+		"AKIA" + strings.Repeat("Z7Q8", 4),
 		"sk_test_" + strings.Repeat("a1B2", 6),
 		"eyJhbGciOiJIUzI1NiJ9 alone",
 		"postgres://user:${DB_PASSWORD}@db/app",
@@ -80,6 +107,25 @@ func TestCheck_PassesWhatIsNoSecret(t *testing.T) {
 	}
 	gittest.Stage(t, dir, map[string]string{"a.go": strings.Join(lines, "\n")})
 	expect(t, find(t, dir))
+}
+
+// A private key counts by its body: on the lines after its BEGIN line, PEM's headers between, or
+// after it on the same line, as a string in code holds it; its BEGIN line alone passes, and so does
+// one a long name follows.
+func TestCheck_FindsAPrivateKeyByItsBody(t *testing.T) {
+	dir := gittest.Repo(t)
+	begin := "-----BEGIN " + "PRIVATE KEY-----"
+	gittest.Stage(t, dir, map[string]string{
+		"key.pem": begin + "\n" + body + "\n" + body + "\n-----END PRIVATE KEY-----\n",
+		"old.pem": "-----BEGIN RSA " + "PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\n" +
+			"DEK-Info: AES-128-CBC,0A1B\n\n" + body + "\n",
+		"parse.go": "const begin = \"" + begin + "\"\nfunc parse() {}\n",
+		"read.go": "const begin = \"" + begin + "\"\n" +
+			"func readThePrivateKeyFromTheGivenBlockAndReturnIt() {}\n",
+	})
+	expect(t, find(t, dir),
+		checks.Finding{File: "key.pem", Line: 1, Reason: "a private key"},
+		checks.Finding{File: "old.pem", Line: 1, Reason: "a private key"})
 }
 
 // No output holds the Secret (PRD, criterion 10): a Finding has its place and its kind only.
