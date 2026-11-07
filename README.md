@@ -11,9 +11,9 @@ Part of [bunderlog](https://github.com/bunderlog).
 
 ## Status
 
-1.0 is released. The Checks are ported from the `baloo` plugin
+Released. 1.0 ported the Checks from the `baloo` plugin
 ([bunderlog/claude-plugins](https://github.com/bunderlog/claude-plugins)) at v0.34.0, into a Go
-binary that needs no Claude and no runtime.
+binary that needs no Claude and no runtime; they live here since.
 
 ## Use
 
@@ -60,11 +60,11 @@ the repo runs `hathi`, and `hathi help` lists the rest.
 
 ### Deeper secret scanning
 
-`no-secrets-in-commits` finds Env files and the kinds of key with a prefix of their own, such as
-AWS's or GitHub's. For more, run [gitleaks](https://github.com/gitleaks/gitleaks) beside `hathi`,
-and keep both on: only `hathi` flags an Env file. `gitleaks:allow` marks a false alarm for both.
-On GitHub, turn on secret scanning and push protection as well (free for a public repo): GitHub
-then also rejects a push that holds a token it knows, server-side.
+`no-secrets-in-commits` finds Env files and the Kinds of Secret with a prefix of their own, such as
+AWS's or GitHub's keys. For more, run [gitleaks](https://github.com/gitleaks/gitleaks) beside
+`hathi`, and keep both on: only `hathi` flags an Env file. `gitleaks:allow` marks a false alarm for
+both. On GitHub, turn on secret scanning and push protection as well (free for a public repo):
+GitHub then also rejects a push that holds a token it knows, server-side.
 
 ```toml
 # mise.toml, under [tools] beside hathi
@@ -100,12 +100,12 @@ commit, and the tests before a push (`.claude/baloo.yml`).
 
 ## Where things are
 
-- [.about/prd/hathi.md](.about/prd/hathi.md) — what 1.0 must do.
+- [.about/prd/hathi.md](.about/prd/hathi.md) — what `hathi` must do.
 - [.about/adr/distribution.md](.about/adr/distribution.md) — a Go binary through GitHub Releases
   only, and why.
 - [.about/adr/hooks.md](.about/adr/hooks.md) — `hathi` runs inside Git hooks and never installs
   them.
 - [.about/adr/config.md](.about/adr/config.md) — the settings are `.hathi.yml` at the repo root.
-- [.about/adr/secrets.md](.about/adr/secrets.md) — `hathi` finds a few kinds of Secret, and
+- [.about/adr/secrets.md](.about/adr/secrets.md) — `hathi` finds a few Kinds of Secret, and
   gitleaks beside it finds the rest.
 - [.about/glossary.md](.about/glossary.md) — the terms.

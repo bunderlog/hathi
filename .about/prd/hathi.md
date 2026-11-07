@@ -1,4 +1,4 @@
-# hathi 1.0
+# hathi
 
 ## Problem
 
@@ -70,16 +70,16 @@ One binary with subcommands (ADR distribution).
 | `hathi check pre-push [<remote> <url>]` | Git hook | reads the pushed refs on stdin as Git gives them: `linear-history`; the arguments Git passes are optional and ignored, as `baloo` compares with the remote-tracking branches |
 | `hathi check ci` | CI | finds the new commits in GitHub Actions and checks each one's message and changes, and merge commits |
 | `hathi check --range <base>..<head>` | other CIs, a person | the same over a range given by hand |
-| `hathi list [--format text\|json]` | a person | every Check: its hook, on or off in this project, its settings; a settings problem is listed too and exits `2` (ADR config) |
+| `hathi list [--format text\|json]` | a person | every Check: its hook, on or off in this project, its settings; a Settings problem is listed too and exits `2` (ADR config) |
 | `hathi explain <check>` | a person, Claude | what the Check looks for, how to fix a failure, how to mark a false alarm |
-| `hathi doctor [--format text\|json]` | a person, Claude | settings problems; whether each hook with a Check on (all three by default) is in the folder Git runs hooks from (`git rev-parse --git-path hooks`) and has a line with `hathi check <hook>` in it (`mise exec -- hathi check …` too), there, in `.husky/<hook>`, or under `<hook>` in `lefthook.yml` or `.lefthook.yml`; whether the running version matches the `github:bunderlog/hathi` pin in `mise.toml` or else `.mise.toml` at the root, as a string or `{ version = … }`, a pin matching by whole parts with or without a leading `v` (`1` any `1.x.y`, `1.0` any `1.0.x`; with no pin, or `latest`, it says so and that is no problem); changes nothing, exits `1` when it finds a problem, `2` for a settings problem (ADR config) |
+| `hathi doctor [--format text\|json]` | a person, Claude | Settings problems; whether each hook with a Check on (all three by default) is in the folder Git runs hooks from (`git rev-parse --git-path hooks`) and has a line with `hathi check <hook>` in it (`mise exec -- hathi check …` too), there, in `.husky/<hook>`, or under `<hook>` in `lefthook.yml` or `.lefthook.yml`; whether the running version matches the `github:bunderlog/hathi` pin in `mise.toml` or else `.mise.toml` at the root, as a string or `{ version = … }`, a pin matching by whole parts with or without a leading `v` (`1` any `1.x.y`, `1.0` any `1.0.x`; with no pin, or `latest`, it says so and that is no problem); changes nothing, exits `1` when it finds a problem, `2` for a settings problem (ADR config) |
 | `hathi hooks print <hook>` | a template, a person | prints the recommended hook script for `commit-msg`, `pre-commit` or `pre-push` to stdout, `#!/bin/sh` and `exec hathi check <hook> "$@"`; writes no file (ADR hooks) |
 | `hathi config --default` | a person | prints the default settings with every key and a comment; writes no file |
 | `hathi version`, `hathi --version` | a person, mise | prints its own version, such as `1.0.0`, or `devel` for a build without one, which `doctor` reports as no problem |
 | `hathi help [<command>]`, `-h`, `--help` | a person | prints the usage of `hathi` or of one command |
 
 `list --format json` prints a JSON object per line, one per Check, with `check`, `hook`, `on` and
-`settings`, and one per settings problem, with `problem` and `line`; `doctor --format json` one per
+`settings`, and one per Settings problem, with `problem` and `line`; `doctor --format json` one per
 thing it checked, with `topic`, `problem` (`true` or `false`) and `message`.
 
 Every command that reads the settings takes `--config <path>` (ADR config), the path from the
@@ -250,7 +250,7 @@ semantic-release do those).
     `test_githook.py` is left out whole, as it tests `baloo`'s runner, which the Command line here
     replaces. Since 1.0 the Checks live in `hathi` (ADR distribution), and a Placeholder passes on
     purpose where `test_secrets.py` expects a failure, such as AWS's documented example key, so
-    those tests take a fake that isn't one (criterion 13).
+    those tests take a made-up Secret that isn't a Placeholder (criterion 13).
     → test: each `// baloo:` test in internal/checks/commit/commit_test.go,
     internal/checks/coauthor/coauthor_test.go, internal/checks/secrets/secrets_test.go,
     internal/checks/conflict/conflict_test.go, internal/checks/size/size_test.go,

@@ -1,4 +1,4 @@
-// Package secrets is the Check no-secrets-in-commits, and the kinds of Secret it knows.
+// Package secrets is the Check no-secrets-in-commits, and the Kinds of Secret it knows.
 package secrets
 
 import (
@@ -16,7 +16,7 @@ import (
 // so lines already marked still pass, and gitleaks', so one Allow mark serves both (ADR secrets).
 var Allow = []string{"hathi:allow-secret", "baloo:allow-secret", "gitleaks:allow"}
 
-// Each kind of Secret, by its name; the first that matches names it, so the more specific come
+// Each Kind of Secret, by its name; the first that matches names it, so the more specific come
 // first. Each has a prefix of its own (ADR secrets); a private key, found by its body, is apart.
 var kinds = []struct {
 	what    string
@@ -127,7 +127,7 @@ var checksummed = []struct {
 		}},
 }
 
-// A match holding one of these is a placeholder, not a Secret, in any case (ADR secrets).
+// A match holding one of these is a Placeholder, not a Secret, in any case (ADR secrets).
 var placeholders = []string{"example", "sample", "xxxxxx", "aaaaaa", "abcde", "00000", "*****"}
 
 var (
@@ -258,7 +258,7 @@ func scan(text string) []checks.Finding {
 	return found
 }
 
-// secret returns the kind of the first Secret in `line` that isn't a placeholder, or "".
+// secret returns the Kind of the first Secret in `line` that isn't a Placeholder, or "".
 func secret(line string) string {
 	for _, k := range checksummed {
 		for _, m := range k.pattern.FindAllString(line, -1) {
@@ -304,7 +304,7 @@ func base62Checksum(match string) bool {
 }
 
 // hasEncodedKey reports whether `line` holds a PEM private key in base64. Not one of the kinds, as
-// its base64 holds runs such as AAAAAA that would make it a placeholder.
+// its base64 holds runs such as AAAAAA that would make it a Placeholder.
 func hasEncodedKey(line string) bool {
 	for _, run := range encodedPEM.FindAllString(line, -1) {
 		decoded, _ := base64.StdEncoding.DecodeString(run[:len(run)/4*4])
@@ -340,7 +340,7 @@ Perplexity, LangSmith, Pinecone) or a service (Stripe live, Shopify, Shippo live
 Telegram, SendGrid, Resend, Sentry, Grafana, New Relic, Dynatrace, PostHog, Linear, Notion,
 Figma, Contentful, Typeform, Postman, ReadMe, Prefect, Mapbox); an age key; a webhook signing
 secret; a Slack, Discord or Microsoft Teams webhook URL; a JWT; a password in a URL. A
-placeholder passes, such as AWS's documented example key, one of x's, or a GitHub, npm,
+Placeholder passes, such as AWS's documented example key, one of x's, or a GitHub, npm,
 Cloudflare or Atlassian token whose checksum fails. It names where, never the Secret itself.
 
 To fix it, remove the Secret from the change and keep it in the environment or a secret store;

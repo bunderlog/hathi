@@ -7,7 +7,7 @@ Check a change with `mise run check`.
 
 - Before designing or planning: the ADRs in `.about/adr/`. Follow them; to change one, edit it in
   place (baloo `adr` skill), never work around it.
-- What 1.0 must do: `.about/prd/hathi.md`.
+- What `hathi` must do: `.about/prd/hathi.md`.
 - Naming anything in code, UI or docs: `.about/glossary.md`. One word per concept, the glossary's.
 - Open questions: `.about/inbox.md`. Answer from there, don't settle them in code.
 
