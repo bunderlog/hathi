@@ -1,22 +1,23 @@
 # The settings are `.hathi.yml` at the repo root
 
-Date: 2026-11-06
+Date: 2026-11-07
 
 `hathi` reads its settings from one file, `.hathi.yml`, at the root of the repo
 (`git rev-parse --show-toplevel`). It looks nowhere else and merges nothing: a monorepo has one file
 for the whole repo. Over a range (`hathi check ci`, `--range`), each commit is checked with its own
 `.hathi.yml`, as its Git hooks would have checked it, so a commit that loosens a setting doesn't
-loosen it for the commits before. `--config <path>` points at another file, for CI or an unusual
-layout. Without a file every Check is on with its defaults, as the PRD says.
+loosen it for the commits before; a pre-push Check, whose Input is the whole range, takes the
+head's, as a push takes the checkout's. `--config <path>` points at another file, for CI or an
+unusual layout. Without a file every Check is on with its defaults, as the PRD says.
 
 The file is YAML. Its first line names the JSON Schema for editors,
 `# yaml-language-server: $schema=…`, so keys complete and wrong values show as you type, as
 `baloo.yml` does today.
 
-A key that isn't a setting, or a value that doesn't decode, is a problem: one line with its line
-number, exit `2`. The other settings still apply in `hathi doctor` and `hathi list`, so one typo
-doesn't hide the rest; `hathi check` stops on it, since a Check run with settings the project didn't
-mean would pass or fail for the wrong reason.
+A Settings problem (glossary), such as a key that isn't a setting or a value that doesn't decode,
+is one line with its line number, exit `2`. The other settings still apply in `hathi doctor` and
+`hathi list`, so one typo doesn't hide the rest; `hathi check` stops on it, since a Check run with
+settings the project didn't mean would pass or fail for the wrong reason.
 
 `hathi` never writes the file. `hathi config --default` prints a full one to stdout.
 
@@ -48,8 +49,8 @@ its own reader (Python's standard library only) doesn't apply.
 
 ## Consequences
 
-- When `baloo` calls `hathi` instead of its own copy, the Checks' keys under `git-hooks` in each
-  project's `.claude/baloo.yml` move to `.hathi.yml`: one migration per project, which `baloo`
+- When `baloo` drops its Checks for `hathi`'s (ADR distribution), their keys under `git-hooks` in
+  each project's `.claude/baloo.yml` move to `.hathi.yml`: one migration per project, which `baloo`
   should offer rather than leave to be found.
 - The schema is `schema.json` at this repo's root, and `$schema` points at its raw URL on `main`,
   `https://raw.githubusercontent.com/bunderlog/hathi/main/schema.json`. Every project's

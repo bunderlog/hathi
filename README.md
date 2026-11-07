@@ -67,8 +67,7 @@ On GitHub, turn on secret scanning and push protection as well (free for a publi
 then also rejects a push that holds a token it knows, server-side.
 
 ```toml
-[tools]
-"github:bunderlog/hathi" = "1.0.1"
+# mise.toml, under [tools] beside hathi
 gitleaks = "8.30.1"
 ```
 

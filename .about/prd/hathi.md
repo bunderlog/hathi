@@ -36,9 +36,10 @@ Each Check's rules are `baloo`'s code in `plugins/baloo/scripts/baloo/checks/` a
 Release `hathi` ports from, its docstrings included: among them, a message's `#` lines and what
 follows a `git commit -v` scissors line are ignored, a message Git writes itself (`Merge …`,
 `Revert "…"`, `fixup! …`) passes `conventional-commits` but not `no-ai-coauthor`, an Env file's
-template (`.example`, `.sample`, `.template`, `.dist`) passes, the marker goes on the line or on an
-Env file's first line, and a "new file" is one the changes add, not one they grow. `explain` and the
-docs name `hathi:allow-secret`; `baloo:allow-secret` passes too, so lines already marked still pass.
+template (`.example`, `.sample`, `.template`, `.dist`) passes, the Allow mark goes on the line or
+on an Env file's first line, and a "new file" is one the changes add, not one they grow. `explain`
+and the docs name `hathi:allow-secret`; `baloo:allow-secret` passes too, so lines already marked
+still pass.
 
 Settings in `.hathi.yml` are `baloo`'s keys under `git-hooks`, at the top level, plus `scopes` and
 `pr-title` under `conventional-commits`: each Check's name with `true`, `false` or its settings. A
@@ -95,7 +96,7 @@ Flags for `check`:
   annotations so a failure shows on its line in the PR. The default is `github` when
   `GITHUB_ACTIONS` is `true`, else `text`.
 
-What `check` prints, a Verdict per finding (glossary); a passing one's `reason` is empty. A Check
+What `check` prints, a Verdict per Finding (glossary); a passing one's `reason` is empty. A Check
 off in the settings or skipped gives none. Over a range each Check gives its Verdicts per commit; a
 push without a merge commit, like a range without one, gets a single passing `linear-history`
 Verdict. A failing Verdict splits `baloo`'s finding: `file` and `line` where it names them, the rest
@@ -123,9 +124,10 @@ stderr as one line in every format, and in `github` also as an `::error title=ha
 Over a range, `ci` and `--range` take every commit `git rev-list <base>..<head>` gives, a side
 branch's too, and give each the Verdicts its Git hooks would have given it: the commit-msg Checks on
 its message and the pre-commit Checks on its changes against its parent, as if staged there, with
-that commit's `.hathi.yml`, unless `--config` names a file, and its `.gitattributes` (Git 2.40 or
-later, for `--attr-source`; with an older Git, `ci` and `--range` exit `2` naming the version,
-rather than check with other attributes than the commit's). A merge commit gets the commit-msg
+that commit's `.hathi.yml` (`linear-history`, a pre-push Check, with the head's), unless `--config`
+names a file, and its `.gitattributes` (Git 2.40 or later, for `--attr-source`; with an older Git,
+`ci` and `--range` exit `2` naming the version, rather than check with other attributes than the
+commit's). A merge commit gets the commit-msg
 Checks and a failing `linear-history` Verdict, but no pre-commit Checks, as its parents brought its
 changes; a range without one gets a single passing `linear-history` Verdict. So a Secret one commit
 adds and the next removes fails, as it did locally; `baloo`'s CI recipe, which checks the changes
@@ -220,8 +222,8 @@ semantic-release do those).
 7. Settings come from `.hathi.yml` at the repo root, or the file `--config` names (ADR config);
    with none, every Check above is on with its defaults, and `hathi config --default` prints exactly
    those defaults. An unknown key or a bad value exits `2` with its line number. Over a range, a
-   commit whose `.hathi.yml` turns a Check off is checked with it off, and the commits before it
-   with it on.
+   commit whose `.hathi.yml` turns a commit-msg or pre-commit Check off is checked with it off, and
+   the commits before it with it on.
    → test: internal/settings/settings_test.go "TestParse_DefaultsWithoutSettings";
    internal/settings/settings_test.go "TestParse_TellsEachProblemByItsLine";
    internal/cli/cli_test.go "TestCheck_TakesSettingsFromTheRootOrConfig"; internal/cli/cli_test.go

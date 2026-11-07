@@ -1,7 +1,7 @@
 # hathi
 
 Commit and repo Checks for Git hooks and CI, as a Go binary. What it is: [README.md](README.md).
-Check a change with `mise run check` (golangci-lint, `go test`).
+Check a change with `mise run check`.
 
 ## Where things are decided
 

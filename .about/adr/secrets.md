@@ -12,7 +12,7 @@ and the binary keeps its few dependencies.
 A match is a Secret only if it isn't a placeholder: one holding `example`, `sample`, `xxxxxx`,
 `aaaaaa`, `abcde`, `00000` or `*****`, in any case, passes, as trufflehog's filter does, so AWS's
 documented example key (`AKIA…EXAMPLE`) and a `ghp_xxxx…` in docs or tests pass. Where a kind's
-format has a marker of its own, the pattern asks for it: OpenAI's `T3BlbkFJ`, AWS's base32
+format has a fixed part of its own, the pattern asks for it: OpenAI's `T3BlbkFJ`, AWS's base32
 alphabet, and a private key's body after its `BEGIN` line, not the line alone. A private key in
 base64, as a kubeconfig's `client-key-data` holds one, counts once decoded; it isn't held to the
 placeholders, since base64 holds runs such as `AAAAAA`.
@@ -36,7 +36,7 @@ passes.
 
 A project that adds gitleaks keeps `no-secrets-in-commits` on: gitleaks doesn't flag an Env file by
 its name. A Secret both find is reported twice. `gitleaks:allow` marks a false alarm for `hathi`
-too, so one mark serves both; gitleaks takes only its own.
+too, so one Allow mark serves both; gitleaks takes only its own.
 
 ## Considered options
 

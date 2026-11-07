@@ -13,8 +13,9 @@ A script Git runs at a step of its own (`commit-msg`, `pre-commit`, `pre-push`),
 `hathi` has no Hooks of Claude Code, so "hook" alone means a Git hook here, unlike in `baloo`.
 
 **Settings**:
-What a repo sets for `hathi`: `.hathi.yml` at its root, or over a Range each commit's own (ADR
-config), turning each Check on or off and giving its options.
+What a repo sets for `hathi`: `.hathi.yml` at its root, or over a Range each commit's own for the
+commit-msg and pre-commit Checks and the head's for the pre-push ones (ADR config), turning each
+Check on or off and giving its options.
 _Avoid_: config, which in `baloo` is `.claude/baloo.yml`
 _In code_: the flag `--config` and the command `hathi config` keep the names CLIs use
 
@@ -49,6 +50,26 @@ The commits `hathi check ci` or `--range` checks one by one, each with the Verdi
 would have given it: those from the merge base of a base and a head to the head. `<base>..<head>`
 only names one; for a push to a branch other than the default one, `ci` leaves out what the
 default branch already has.
+_In code_: `checks.Range`
+
+**Kind**:
+A form of Secret with a published format and a prefix that hardly anything else has, such as an
+AWS access key or a GitHub token (ADR secrets); its name is the reason of a Finding on it. Not an
+Env file, which `no-secrets-in-commits` finds by its name, not by what it holds.
+_In code_: `secrets.kinds`, `secrets.checksummed`
+
+**Placeholder**:
+A match of a Kind that is no real Secret, and passes: it holds a word such as `example` or
+`xxxxxx`, or it fails its Kind's checksum. Not an Allow mark, which a person puts on a real-looking
+line to pass it.
+_Avoid_: fake
+_In code_: `isPlaceholder` for the words, each checksummed Kind's `holds` for the checksum
+
+**Allow mark**:
+A comment that passes a line for `no-secrets-in-commits`, or an Env file when on its first line:
+`hathi:allow-secret`, and `baloo:allow-secret` and `gitleaks:allow` too.
+_Avoid_: marker, the word of a conflict marker
+_In code_: `secrets.Allow`
 
 **Release**:
 A tagged version of `hathi` on GitHub, carrying an archive with the binary per platform and their
