@@ -29,8 +29,9 @@ var (
 // person generates no commit, and the robot always marks one. A message Git writes itself is
 // checked too.
 var Check = checks.Check{
-	Name: "no-ai-coauthor",
-	Hook: "commit-msg",
+	Name:    "no-ai-coauthor",
+	Hook:    "commit-msg",
+	Explain: explanation,
 	Find: func(in checks.Input) ([]checks.Finding, error) {
 		var found []checks.Finding
 		for i, line := range strings.Split(checks.AboveScissors(in.Message), "\n") {
@@ -47,3 +48,16 @@ var Check = checks.Check{
 		return found, nil
 	},
 }
+
+// explanation is what `hathi explain` prints for the Check: what it looks for, how to fix a
+// failure, and how to mark a false alarm.
+const explanation = `no-ai-coauthor (commit-msg) looks for a line of the commit message that
+makes an AI its co-author, a Co-authored-by trailer naming Claude, Copilot, Cursor, Codex, Gemini,
+Devin, Aider or Amp, or credits one with it, such as "Generated with Claude Code". A person's
+Co-authored-by passes, even one named Claude with a surname.
+
+To fix it, remove the line: git commit --amend for the last commit, git rebase -i for an older one.
+Claude Code adds its own unless its settings turn attribution off.
+
+no-ai-coauthor: false in .hathi.yml turns it off.
+`

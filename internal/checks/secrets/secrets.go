@@ -13,7 +13,7 @@ import (
 )
 
 // Allow marks a false alarm: on a line, or on an Env file's first line. `baloo`'s mark passes too,
-// so lines already marked still pass, and gitleaks', so one mark serves both (ADR secrets).
+// so lines already marked still pass, and gitleaks', so one Allow mark serves both (ADR secrets).
 var Allow = []string{"hathi:allow-secret", "baloo:allow-secret", "gitleaks:allow"}
 
 // Each kind of Secret, by its name; the first that matches names it, so the more specific come
@@ -23,9 +23,9 @@ var kinds = []struct {
 	pattern *regexp.Regexp
 }{
 	{"an AWS access key", regexp.MustCompile(`\b(?:AKIA|ASIA|ABIA|ACCA)[A-Z2-7]{16}\b`)},
-	{"a GitHub token", regexp.MustCompile(`\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{60,})`)},
-	{"a Cloudflare token", regexp.MustCompile(`\bcf(?:k|ut|at)_[A-Za-z0-9]{40}[a-f0-9]{8}\b`)},
-	{"an Atlassian API token", regexp.MustCompile(`\bATATT3[A-Za-z0-9_=-]{178}[A-F0-9]{8}\b`)},
+	// A classic ghp_ token, 36 characters, is one of the checksummed kinds.
+	{"a GitHub token", regexp.MustCompile(
+		`\b(?:gh[ousr]_[A-Za-z0-9]{36,}|ghp_[A-Za-z0-9]{37,}|github_pat_[A-Za-z0-9_]{60,})`)},
 	{"a GitLab token", regexp.MustCompile(
 		`\bgl(?:pat|dt|rt|cbt|ptt|ft|imt|agent|oas|soat|ffct)-[0-9A-Za-z_.-]{20,}`)},
 	{"a Slack webhook URL", regexp.MustCompile(
@@ -44,7 +44,6 @@ var kinds = []struct {
 	{"a LangSmith API key", regexp.MustCompile(`\blsv2_(?:pt|sk)_[a-f0-9]{32}_[a-f0-9]{10}\b`)},
 	{"a Pinecone API key", regexp.MustCompile(`\bpcsk_[A-Za-z0-9]{5,6}_[A-Za-z0-9]{63}\b`)},
 	{"a Google API key", regexp.MustCompile(`\bAIza[0-9A-Za-z_-]{35}`)},
-	{"an npm token", regexp.MustCompile(`\bnpm_[A-Za-z0-9]{36}\b`)},
 	{"a PyPI token", regexp.MustCompile(`\bpypi-AgEIcHlwaS5vcmc[A-Za-z0-9_-]{50,}`)},
 	{"a Docker Hub token", regexp.MustCompile(`\bdckr_(?:pat|oat)_[A-Za-z0-9_-]{20,}`)},
 	{"a Hugging Face token", regexp.MustCompile(`\b(?:hf_|api_org_)[A-Za-z]{34}\b`)},
@@ -96,13 +95,36 @@ var kinds = []struct {
 	{"a Contentful token", regexp.MustCompile(`\bCFPAT-[A-Za-z0-9_-]{43}`)},
 	{"a Typeform token", regexp.MustCompile(`\btfp_[A-Za-z0-9_]{40,59}\b`)},
 	// Resend's keys are base58: no 0, O, I or l.
-	{"a Resend API key", regexp.MustCompile(`\bre_[1-9A-HJ-NP-Za-km-z]{8}_[1-9A-HJ-NP-Za-km-z]{24}\b`)},
+	{"a Resend API key", regexp.MustCompile(
+		`\bre_[1-9A-HJ-NP-Za-km-z]{8}_[1-9A-HJ-NP-Za-km-z]{24}\b`)},
 	{"a Shippo live token", regexp.MustCompile(`\bshippo_live_[a-fA-F0-9]{40}\b`)},
-	{"a JWT", regexp.MustCompile(`\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{20,}`)},
+	{"a JWT", regexp.MustCompile(
+		`\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{20,}`)},
 	// The password in a URL, between `://user:` and `@`, unless it is a placeholder: `$VAR`,
 	// `${VAR}`, `<password>`, `****`. Whitespace is ASCII's, \v too, as in `baloo`.
 	{"a password in a URL", regexp.MustCompile(
 		`\b[A-Za-z][A-Za-z0-9+.-]*://[^\t-\r :/@]*:[^\t-\r /@$<{*][^\t-\r /@]*@`)},
+}
+
+// The kinds whose last characters are a checksum of the rest, each with the check of its own (ADR
+// secrets); one whose checksum fails is a Placeholder, and passes.
+var checksummed = []struct {
+	what    string
+	pattern *regexp.Regexp
+	holds   func(match string) bool
+}{
+	{"a GitHub token", regexp.MustCompile(`\bghp_[A-Za-z0-9]{36}\b`), base62Checksum},
+	{"an npm token", regexp.MustCompile(`\bnpm_[A-Za-z0-9]{36}\b`), base62Checksum},
+	// The CRC32 of the 40 characters after the prefix, in lower-case hex.
+	{"a Cloudflare token", regexp.MustCompile(`\bcf(?:k|ut|at)_[A-Za-z0-9]{40}[a-f0-9]{8}\b`),
+		func(m string) bool {
+			return m[len(m)-8:] == fmt.Sprintf("%08x", crc32.ChecksumIEEE([]byte(m[len(m)-48:len(m)-8])))
+		}},
+	// The CRC32 of all 184 characters before it, in upper-case hex.
+	{"an Atlassian API token", regexp.MustCompile(`\bATATT3[A-Za-z0-9_=-]{178}[A-F0-9]{8}\b`),
+		func(m string) bool {
+			return m[184:] == fmt.Sprintf("%08X", crc32.ChecksumIEEE([]byte(m[:184])))
+		}},
 }
 
 // A match holding one of these is a placeholder, not a Secret, in any case (ADR secrets).
@@ -133,8 +155,9 @@ var diff = []string{"--no-ext-diff", "--no-textconv", "--no-color", "--diff-filt
 // line they add, by its line in the file they leave, never the Secret itself. A line marked Allow
 // passes, and an Env file marked on its first line, whose lines are still looked through.
 var Check = checks.Check{
-	Name: "no-secrets-in-commits",
-	Hook: "pre-commit",
+	Name:    "no-secrets-in-commits",
+	Hook:    "pre-commit",
+	Explain: explanation,
 	Find: func(in checks.Input) ([]checks.Finding, error) {
 		names, err := in.Changes.Diff(nil, append(diff, "--name-only", "-z")...)
 		if err != nil {
@@ -237,9 +260,16 @@ func scan(text string) []checks.Finding {
 
 // secret returns the kind of the first Secret in `line` that isn't a placeholder, or "".
 func secret(line string) string {
+	for _, k := range checksummed {
+		for _, m := range k.pattern.FindAllString(line, -1) {
+			if !isPlaceholder(m) && k.holds(m) {
+				return k.what
+			}
+		}
+	}
 	for _, k := range kinds {
 		for _, m := range k.pattern.FindAllString(line, -1) {
-			if !isPlaceholder(m) && checksumHolds(m) {
+			if !isPlaceholder(m) {
 				return k.what
 			}
 		}
@@ -257,33 +287,20 @@ func isPlaceholder(match string) bool {
 	return false
 }
 
-// cloudflare is a whole Cloudflare token: its prefix, 40 characters and its checksum.
-var cloudflare = regexp.MustCompile(`^cf(?:k|ut|at)_[A-Za-z0-9]{40}[a-f0-9]{8}$`)
-
-// base62 is the alphabet of a GitHub token's checksum.
+// base62 is the alphabet of GitHub's and npm's checksum.
 const base62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
-// checksumHolds reports whether a token that ends in a checksum ends in the right one (ADR
-// secrets): a classic GitHub token or an npm one in the CRC32 of its 30 random characters in
-// base62, padded to 6 with 0, a Cloudflare one in the CRC32 of its 40 in hex, and an Atlassian one
-// in the CRC32 of all before it in upper-case hex. A match of another kind holds.
-func checksumHolds(match string) bool {
-	switch {
-	case (strings.HasPrefix(match, "ghp_") || strings.HasPrefix(match, "npm_")) && len(match) == 40:
-		sum := crc32.ChecksumIEEE([]byte(match[4:34]))
-		want := []byte("000000")
-		for i := 5; sum > 0; i-- {
-			want[i] = base62[sum%62]
-			sum /= 62
-		}
-		return match[34:] == string(want)
-	case strings.HasPrefix(match, "ATATT3") && len(match) == 192:
-		return match[184:] == fmt.Sprintf("%08X", crc32.ChecksumIEEE([]byte(match[:184])))
-	case cloudflare.MatchString(match):
-		body, sum := match[len(match)-48:len(match)-8], match[len(match)-8:]
-		return sum == fmt.Sprintf("%08x", crc32.ChecksumIEEE([]byte(body)))
+// base62Checksum reports whether a GitHub or npm token, its prefix and 36 characters, ends in the
+// CRC32 of its 30 random characters in base62, padded to 6 with 0.
+func base62Checksum(match string) bool {
+	random, sum := match[len(match)-36:len(match)-6], match[len(match)-6:]
+	checksum := crc32.ChecksumIEEE([]byte(random))
+	want := []byte("000000")
+	for i := 5; checksum > 0; i-- {
+		want[i] = base62[checksum%62]
+		checksum /= 62
 	}
-	return true
+	return sum == string(want)
 }
 
 // hasEncodedKey reports whether `line` holds a PEM private key in base64. Not one of the kinds, as
@@ -308,3 +325,28 @@ func isBody(text string) bool {
 	}
 	return false
 }
+
+// explanation is what `hathi explain` prints for the Check: what it looks for, how to fix a
+// failure, and how to mark a false alarm.
+const explanation = `no-secrets-in-commits (pre-commit) looks for a Secret on a line the
+changes add and for an Env file they add or change, such as .env, .env.local or .envrc; a
+template of one (.example, .sample, .template, .dist) passes. A Secret is a private key with its
+body, in PEM, PGP or base64; a key or token with a prefix of its own from a cloud (AWS, Google,
+Cloudflare, DigitalOcean, Fly.io, Heroku, Supabase, PlanetScale, Databricks, Vault, Doppler,
+1Password, Tailscale, Terraform Cloud, Pulumi), a code host, registry or CI (GitHub, GitLab,
+Atlassian, npm, PyPI, RubyGems, Clojars, Docker Hub, Docker Swarm, CircleCI, Buildkite, Hugging
+Face, Sourcegraph), an AI provider (Anthropic, OpenAI, OpenRouter, Groq, xAI, Replicate,
+Perplexity, LangSmith, Pinecone) or a service (Stripe live, Shopify, Shippo live, Slack,
+Telegram, SendGrid, Resend, Sentry, Grafana, New Relic, Dynatrace, PostHog, Linear, Notion,
+Figma, Contentful, Typeform, Postman, ReadMe, Prefect, Mapbox); an age key; a webhook signing
+secret; a Slack, Discord or Microsoft Teams webhook URL; a JWT; a password in a URL. A
+placeholder passes, such as AWS's documented example key, one of x's, or a GitHub, npm,
+Cloudflare or Atlassian token whose checksum fails. It names where, never the Secret itself.
+
+To fix it, remove the Secret from the change and keep it in the environment or a secret store;
+one already pushed is out, so revoke it too. Keep an Env file out of Git, or commit a template.
+
+To mark a false alarm, put hathi:allow-secret on the line, or on an Env file's first line, whose
+lines are still looked through; baloo:allow-secret and gitleaks:allow pass too. A project that
+needs deeper scanning runs gitleaks beside hathi.
+`

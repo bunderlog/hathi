@@ -16,8 +16,9 @@ const DefaultMaxSize = 1024
 // already committed passes, changed or renamed too, and so does a submodule.
 func Check(maxSize int) checks.Check {
 	return checks.Check{
-		Name: "no-large-files",
-		Hook: "pre-commit",
+		Name:    "no-large-files",
+		Hook:    "pre-commit",
+		Explain: explanation,
 		Find: func(in checks.Input) ([]checks.Finding, error) {
 			// Each file added is `:<old mode> <new mode> <old id> <new id> A`, then its path.
 			raw, err := in.Changes.Diff(nil, "-M", "--diff-filter=A", "--raw", "-z", "--no-abbrev")
@@ -60,3 +61,15 @@ func Check(maxSize int) checks.Check {
 		},
 	}
 }
+
+// explanation is what `hathi explain` prints for the Check: what it looks for, how to fix a
+// failure, and how to mark a false alarm.
+const explanation = `no-large-files (pre-commit) looks for a file the changes add over max-size
+KB, 1024 by default; a file already committed passes, changed or renamed too, and so does a
+submodule.
+
+To fix it, keep the file out of Git (git rm --cached <file>, then .gitignore it), or keep it in Git
+LFS or a release asset.
+
+To let it in, raise max-size under no-large-files in .hathi.yml.
+`

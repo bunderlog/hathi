@@ -14,8 +14,9 @@ import (
 // merges a branch rebased onto it brings along; that remote's tracking ref of the branch pushed
 // to doesn't count, as the push replaces it. A deletion sends no commits.
 var Check = checks.Check{
-	Name: "linear-history",
-	Hook: "pre-push",
+	Name:    "linear-history",
+	Hook:    "pre-push",
+	Explain: explanation,
 	Find: func(in checks.Input) ([]checks.Finding, error) {
 		defaults, err := in.Repo.Git("for-each-ref", "--format=%(refname) %(symref)", "refs/remotes/*/HEAD")
 		if err != nil {
@@ -52,3 +53,14 @@ var Check = checks.Check{
 		return found, nil
 	},
 }
+
+// explanation is what `hathi explain` prints for the Check: what it looks for, how to fix a
+// failure, and how to mark a false alarm.
+const explanation = `linear-history (pre-push) looks for a merge commit the push sends, and over
+a range for a merge commit in it; the merges the remote's default branch already has pass.
+
+To fix it, rebase instead of merging (git rebase <branch>), then push the rebased branch with
+git push --force-with-lease. git config pull.rebase true makes git pull rebase.
+
+linear-history: false in .hathi.yml turns it off.
+`

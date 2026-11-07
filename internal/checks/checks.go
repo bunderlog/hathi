@@ -17,6 +17,9 @@ import (
 type Check struct {
 	Name string // such as conventional-commits
 	Hook string // the Git hook that runs it: commit-msg, pre-commit or pre-push
+	// Explain is what `hathi explain` prints: what the Check looks for, how to fix a failure, and
+	// how to mark a false alarm.
+	Explain string
 	// Find returns what the Check fails on in `in`, none when it passes, or an error when it can't
 	// check.
 	Find func(in Input) ([]Finding, error)

@@ -154,7 +154,7 @@ func TestCheck_PassesWhatIsNoSecret(t *testing.T) {
 		"-----BEGIN PUBLIC KEY-----",
 		"-----BEGIN " + "PRIVATE KEY-----",
 		"ghp_short",
-		// Placeholders, and a match without its kind's marker.
+		// Placeholders, and a match without its Kind's fixed part.
 		"AKIA" + "IOSFODNN7EXAMPLE",
 		"ghp_" + strings.Repeat("x", 36),
 		"ghp_" + "Hn4Kp8Wq2Lr6Tz1Vb5Xc9Md3Gf7Js0" + "09TywX",              // its checksum is 09TywE

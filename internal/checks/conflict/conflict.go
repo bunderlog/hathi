@@ -16,8 +16,9 @@ const leftover = ": leftover conflict marker"
 // underlined with `=======` alone passes, and so does a file whose conflict-marker-size in
 // .gitattributes is longer.
 var Check = checks.Check{
-	Name: "no-conflict-markers",
-	Hook: "pre-commit",
+	Name:    "no-conflict-markers",
+	Hook:    "pre-commit",
+	Explain: explanation,
 	Find: func(in checks.Input) ([]checks.Finding, error) {
 		// It exits 2 where it finds a marker or a whitespace error.
 		out, err := in.Changes.Diff([]int{2}, "--check", "--no-color")
@@ -77,3 +78,15 @@ func cutLast(s, sep string) (before, after string, found bool) {
 	}
 	return s[:i], s[i+len(sep):], true
 }
+
+// explanation is what `hathi explain` prints for the Check: what it looks for, how to fix a
+// failure, and how to mark a false alarm.
+const explanation = `no-conflict-markers (pre-commit) looks for a conflict marker the changes
+add, as git diff --check finds them, in a file where one of them opens or closes a conflict (<<<<<<<
+or >>>>>>>): a Markdown heading underlined with ======= alone passes.
+
+To fix it, resolve each conflict and stage the file again.
+
+A file that holds markers on purpose passes with a longer conflict-marker-size in .gitattributes,
+such as "testdata/* conflict-marker-size=32".
+`

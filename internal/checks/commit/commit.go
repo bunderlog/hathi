@@ -50,8 +50,9 @@ var Default = Rules{Types: Types, MaxLength: 100}
 // Check is conventional-commits with `rules`.
 func Check(rules Rules) checks.Check {
 	return checks.Check{
-		Name: "conventional-commits",
-		Hook: "commit-msg",
+		Name:    "conventional-commits",
+		Hook:    "commit-msg",
+		Explain: explanation,
 		Find: func(in checks.Input) ([]checks.Finding, error) {
 			if reason := why(in.Message, rules); reason != "" {
 				return []checks.Finding{{Reason: reason}}, nil
@@ -151,3 +152,20 @@ func prefix(s string, n int) string {
 	}
 	return s
 }
+
+// explanation is what `hathi explain` prints for the Check: what it looks for, how to fix a
+// failure, and how to mark a false alarm.
+const explanation = `conventional-commits (commit-msg) looks for a commit message that is a
+Conventional Commit, as commitlint's config-conventional reads it: a "type(scope)!: description"
+subject with one of the types and scopes in .hathi.yml, a description not starting in uppercase nor
+ending in ".", a blank line before the body, lines of up to max-length characters, and a breaking
+change footer as "BREAKING CHANGE: description". Lines starting with # don't count, and a message
+Git writes itself, such as a merge's or a revert's, passes. With pr-title on, hathi check ci checks
+a pull request's title the same way.
+
+To fix it, rewrite the message: git commit --amend for the last commit, git rebase -i for an older
+one, or edit the pull request's title.
+
+To change what passes, set types, scopes or max-length under conventional-commits in .hathi.yml;
+conventional-commits: false turns it off.
+`
