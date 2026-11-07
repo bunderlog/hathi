@@ -23,7 +23,7 @@ and `mise install` fails.
 
 ```toml
 [tools]
-"github:bunderlog/hathi" = "1.0.1"
+"github:bunderlog/hathi" = "1.1.0"
 ```
 
 Commit the Git hooks, and turn them on once per clone. `.githooks/commit-msg` is below;

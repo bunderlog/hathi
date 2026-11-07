@@ -27,19 +27,21 @@ The Checks that are about commits and the repo, as `baloo` v0.34.0 defines them 
 | --- | --- | --- |
 | `conventional-commits` | commit-msg | a message that is not a Conventional Commit |
 | `no-ai-coauthor` | commit-msg | an AI as co-author, or a line crediting one; a person's `Co-Authored-By` passes |
-| `no-secrets-in-commits` | pre-commit | staged changes that add a Secret or an Env file; `hathi:allow-secret` marks a false alarm |
+| `no-secrets-in-commits` | pre-commit | staged changes that add a Secret or an Env file; an Allow mark (`hathi:allow-secret`) passes a false alarm |
 | `no-conflict-markers` | pre-commit | staged changes that add a conflict marker |
 | `no-large-files` | pre-commit | a new file over `max-size` |
 | `linear-history` | pre-push | a push that sends a merge commit |
 
 Each Check's rules are `baloo`'s code in `plugins/baloo/scripts/baloo/checks/` at v0.34.0, the
-Release `hathi` ports from, its docstrings included: among them, a message's `#` lines and what
-follows a `git commit -v` scissors line are ignored, a message Git writes itself (`Merge …`,
-`Revert "…"`, `fixup! …`) passes `conventional-commits` but not `no-ai-coauthor`, an Env file's
-template (`.example`, `.sample`, `.template`, `.dist`) passes, the Allow mark goes on the line or
-on an Env file's first line, and a "new file" is one the changes add, not one they grow. `explain`
-and the docs name `hathi:allow-secret`; `baloo:allow-secret` passes too, so lines already marked
-still pass.
+Release `hathi` ports from, its docstrings included, but for the Kinds of Secret, Placeholders and
+checksums of `no-secrets-in-commits`, which ADR secrets decides: among them, a message's `#` lines
+and what follows a `git commit -v` scissors line are ignored, a message Git writes itself
+(`Merge …`, `Revert "…"`, `fixup! …`) passes `conventional-commits` but not `no-ai-coauthor`, an
+Env file's template (`.example`, `.sample`, `.template`, `.dist`) passes, the Allow mark goes on
+the line or on an Env file's first line, and a "new file" is one the changes add, not one they
+grow. `explain` and the docs name `hathi:allow-secret`; `baloo:allow-secret` passes too, so lines
+already marked still pass, and so does `gitleaks:allow`, so one Allow mark serves both (ADR
+secrets).
 
 Settings in `.hathi.yml` are `baloo`'s keys under `git-hooks`, at the top level, plus `scopes` and
 `pr-title` under `conventional-commits`: each Check's name with `true`, `false` or its settings. A
@@ -170,8 +172,8 @@ semantic-release do those).
   commitlint and turns `conventional-commits` off.
 - Installing Git hooks. The project wires `hathi` into its own hooks (ADR hooks); `hathi` only runs
   inside them.
-- Running gitleaks or matching its rules: 1.0 finds the Secrets `baloo` v0.34.0 finds; deeper
-  scanning is gitleaks', run beside `hathi` (ADR secrets).
+- Running gitleaks or matching its rules: `hathi` finds the Kinds ADR secrets admits; deeper
+  scanning is gitleaks', run beside `hathi`.
 - Running the project's own commands (`mise run check`); that is the project's hook config.
 - Guarding Claude's tool calls; that belongs to a Claude Code plugin, inside the session.
 - Testing on Windows: the Windows binary ships, but the Checks are tried on macOS and Linux only.
@@ -236,7 +238,7 @@ semantic-release do those).
 9. Output carries no color codes when the stream it goes to is not a terminal, when `NO_COLOR`
    is set, or in `json` and `github`.
    → test: internal/cli/cli_test.go "TestCheck_PrintsNoColor"
-10. For every test in `test_commit.py`, `test_coauthor.py`, `test_secrets.py`,
+10. At 1.0, for every test in `test_commit.py`, `test_coauthor.py`, `test_secrets.py`,
     `test_conflict.py`, `test_size.py` and `test_history.py` of `tests/checks/` in
     `bunderlog/claude-plugins` at v0.34.0, a Go test names it in a comment,
     `// baloo: <file> <test>`, and gives the same Verdicts as `baloo`: pass or fail, and each
@@ -246,7 +248,9 @@ semantic-release do those).
     expects an error (`test_fails_outside_a_repo`, `test_fails_on_a_commit_not_here`) expects exit
     `2`, and `test_never_reports_the_secret` that no output holds the Secret;
     `test_githook.py` is left out whole, as it tests `baloo`'s runner, which the Command line here
-    replaces.
+    replaces. Since 1.0 the Checks live in `hathi` (ADR distribution), and a Placeholder passes on
+    purpose where `test_secrets.py` expects a failure, such as AWS's documented example key, so
+    those tests take a fake that isn't one (criterion 13).
     → test: each `// baloo:` test in internal/checks/commit/commit_test.go,
     internal/checks/coauthor/coauthor_test.go, internal/checks/secrets/secrets_test.go,
     internal/checks/conflict/conflict_test.go, internal/checks/size/size_test.go,
@@ -263,3 +267,13 @@ semantic-release do those).
     `go install …@v<version>` prints `<version>` too.
     → test: internal/cli/cli_test.go "TestVersion_PrintsItWithoutTheV" (a `go install` build's
     version is not tested)
+13. `no-secrets-in-commits` fails staged changes that add a Secret of each Kind ADR secrets names,
+    and a private key by its body, in PEM, PGP or base64 once decoded, but not a `BEGIN` line
+    alone; a key without its Kind's fixed part, such as an OpenAI key without `T3BlbkFJ`, is none.
+    It passes a Placeholder: a match holding `example`, `sample`, `xxxxxx`, `aaaaaa`, `abcde`,
+    `00000` or `*****`, or a GitHub `ghp_`, npm, Cloudflare or Atlassian token whose checksum fails;
+    and a line with `gitleaks:allow`, as one with `hathi:allow-secret`.
+    → test: internal/checks/secrets/secrets_test.go "TestCheck_FindsEachKind";
+    internal/checks/secrets/secrets_test.go "TestCheck_PassesWhatIsNoSecret";
+    internal/checks/secrets/secrets_test.go "TestCheck_FindsAPrivateKeyByItsBody";
+    internal/checks/secrets/secrets_test.go "TestCheck_PassesWhatGitleaksAllowMarks"
