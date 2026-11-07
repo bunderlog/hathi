@@ -17,7 +17,8 @@ var fakes = []struct{ what, secret string }{
 	{"a private key", "-----BEGIN RSA " + "PRIVATE KEY-----\\n" + body},
 	{"a private key", "-----BEGIN " + "PRIVATE KEY-----\\n" + body},
 	{"an AWS access key", "AKIA" + strings.Repeat("Z7Q2", 4)},
-	{"a GitHub token", "ghp_" + strings.Repeat("a1", 18)},
+	// The last 6 characters are the base62 CRC32 of the 30 before them, worked out apart.
+	{"a GitHub token", "ghp_" + "Z7q2W9x4K1m8R3t6Y5u0P2s7D4f9G1" + "0F19eW"},
 	{"a GitHub token", "github_pat_" + strings.Repeat("A_b1", 16)},
 	{"a GitLab token", "glpat-" + strings.Repeat("a1B2c", 4)},
 	{"a Slack token", "xoxb-" + "1234567890-abc"},
@@ -92,6 +93,7 @@ func TestCheck_PassesWhatIsNoSecret(t *testing.T) {
 		// Placeholders, and a match without its kind's marker.
 		"AKIA" + "IOSFODNN7EXAMPLE",
 		"ghp_" + strings.Repeat("x", 36),
+		"ghp_" + "Hn4Kp8Wq2Lr6Tz1Vb5Xc9Md3Gf7Js0" + "09TywX", // its checksum is 09TywE
 		"npm_" + strings.Repeat("0", 36),
 		"sk-proj-" + strings.Repeat("a1B2", 10),
 		"AKIA" + strings.Repeat("Z7Q8", 4),

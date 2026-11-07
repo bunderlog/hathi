@@ -15,6 +15,13 @@ documented example key (`AKIA…EXAMPLE`) and a `ghp_xxxx…` in docs or tests p
 format has a marker of its own, the pattern asks for it: OpenAI's `T3BlbkFJ`, AWS's base32
 alphabet, and a private key's body after its `BEGIN` line, not the line alone.
 
+A classic GitHub token (`ghp_` and 36 characters) ends in a checksum: the CRC32 of its 30 random
+characters in base62 (`0-9A-Za-z`), padded to 6 with `0`, which a real, revoked token confirmed on
+2026-11-07, as neither gitleaks nor trufflehog checks. One whose checksum fails passes, so a fake
+`ghp_` in tests and docs does. `gho_`, `ghu_`, `ghs_` and `ghr_` likely share it but no token of
+theirs has confirmed it, and a fine-grained `github_pat_` has none; they are found without it,
+since a wrong guess would pass real tokens.
+
 A project that adds gitleaks keeps `no-secrets-in-commits` on: gitleaks doesn't flag an Env file by
 its name. A Secret both find is reported twice. `gitleaks:allow` marks a false alarm for `hathi`
 too, so one mark serves both; gitleaks takes only its own.

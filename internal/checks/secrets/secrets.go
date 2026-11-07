@@ -2,6 +2,7 @@
 package secrets
 
 import (
+	"hash/crc32"
 	"regexp"
 	"strconv"
 	"strings"
@@ -180,7 +181,7 @@ func scan(text string) []checks.Finding {
 func secret(line string) string {
 	for _, k := range kinds {
 		for _, m := range k.pattern.FindAllString(line, -1) {
-			if !isPlaceholder(m) {
+			if !isPlaceholder(m) && checksumHolds(m) {
 				return k.what
 			}
 		}
@@ -196,6 +197,25 @@ func isPlaceholder(match string) bool {
 		}
 	}
 	return false
+}
+
+// base62 is the alphabet of a GitHub token's checksum.
+const base62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+
+// checksumHolds reports whether a classic GitHub token ends in the checksum of its 30 random
+// characters: their CRC32 in base62, padded to 6 with 0 (ADR secrets). A match of another kind
+// holds.
+func checksumHolds(match string) bool {
+	if !strings.HasPrefix(match, "ghp_") || len(match) != 40 {
+		return true
+	}
+	sum := crc32.ChecksumIEEE([]byte(match[4:34]))
+	want := []byte("000000")
+	for i := 5; sum > 0; i-- {
+		want[i] = base62[sum%62]
+		sum /= 62
+	}
+	return match[34:] == string(want)
 }
 
 // isBody reports whether `text` holds a private key's body: a run of base64 with a digit, which a
