@@ -2,6 +2,7 @@
 package secrets
 
 import (
+	"encoding/base64"
 	"fmt"
 	"hash/crc32"
 	"regexp"
@@ -34,6 +35,13 @@ var kinds = []struct {
 	// OpenAI's keys hold T3BlbkFJ, "OpenAI" in base64.
 	{"an OpenAI API key", regexp.MustCompile(
 		`\bsk-(?:(?:proj|svcacct|admin)-)?[A-Za-z0-9_-]{20,}T3BlbkFJ[A-Za-z0-9_-]{20,}`)},
+	{"an OpenRouter API key", regexp.MustCompile(`\bsk-or-v1-[0-9a-f]{64}\b`)},
+	{"a Groq API key", regexp.MustCompile(`\bgsk_[A-Za-z0-9]{52}\b`)},
+	{"an xAI API key", regexp.MustCompile(`\bxai-[0-9A-Za-z_]{80}\b`)},
+	{"a Replicate token", regexp.MustCompile(`\br8_[0-9A-Za-z_-]{37}`)},
+	{"a Perplexity API key", regexp.MustCompile(`\bpplx-[A-Za-z0-9]{48}\b`)},
+	{"a LangSmith API key", regexp.MustCompile(`\blsv2_(?:pt|sk)_[a-f0-9]{32}_[a-f0-9]{10}\b`)},
+	{"a Pinecone API key", regexp.MustCompile(`\bpcsk_[A-Za-z0-9]{5,6}_[A-Za-z0-9]{63}\b`)},
 	{"a Google API key", regexp.MustCompile(`\bAIza[0-9A-Za-z_-]{35}`)},
 	{"an npm token", regexp.MustCompile(`\bnpm_[A-Za-z0-9]{36}\b`)},
 	{"a PyPI token", regexp.MustCompile(`\bpypi-AgEIcHlwaS5vcmc[A-Za-z0-9_-]{50,}`)},
@@ -46,6 +54,27 @@ var kinds = []struct {
 	{"an age secret key", regexp.MustCompile(
 		`\bAGE-SECRET-KEY-1[QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]{58}\b`)},
 	{"a Telegram bot token", regexp.MustCompile(`\b[0-9]{5,16}:A[0-9A-Za-z_-]{34}\b`)},
+	{"a webhook signing secret", regexp.MustCompile(`\bwhsec_[A-Za-z0-9+/=]{32,}`)},
+	{"a Supabase token", regexp.MustCompile(`\bsbp_[a-f0-9]{40}\b`)},
+	{"a Sentry token", regexp.MustCompile(
+		`\b(?:sntryu_[a-f0-9]{64}\b|sntrys_eyJ[A-Za-z0-9+/=_]{50,})`)},
+	{"a Fly.io token", regexp.MustCompile(`\b(?:fo1_[\w-]{43}|fm[12][ar]?_[A-Za-z0-9+/]{100,})`)},
+	{"a Linear API key", regexp.MustCompile(`\blin_api_[A-Za-z0-9]{40}\b`)},
+	{"a Notion token", regexp.MustCompile(`\bntn_[0-9]{11}[A-Za-z0-9]{35}\b`)},
+	{"a Figma token", regexp.MustCompile(`\bfigd_[A-Za-z0-9_-]{40}`)},
+	{"a Doppler token", regexp.MustCompile(`\bdp\.pt\.[A-Za-z0-9]{43}\b`)},
+	{"a 1Password token", regexp.MustCompile(`\bops_eyJ[A-Za-z0-9+/]{250,}`)},
+	{"a Heroku API key", regexp.MustCompile(`\bHRKU-AA[0-9A-Za-z_-]{58}`)},
+	{"a Terraform Cloud token", regexp.MustCompile(`\b[a-z0-9]{14}\.atlasv1\.[a-z0-9_=-]{60,70}`)},
+	{"a Pulumi token", regexp.MustCompile(`\bpul-[a-f0-9]{40}\b`)},
+	{"a Postman API key", regexp.MustCompile(`\bPMAK-[a-f0-9]{24}-[a-f0-9]{34}\b`)},
+	{"a New Relic key", regexp.MustCompile(`\bNR(?:AK|II)-[A-Za-z0-9_-]{27,32}`)},
+	{"a Databricks token", regexp.MustCompile(`\bdapi[a-f0-9]{32}(?:-\d)?\b`)},
+	{"a Discord webhook URL", regexp.MustCompile(
+		`\bdiscord(?:app)?\.com/api/webhooks/[0-9]{17,20}/[A-Za-z0-9_-]{60,68}`)},
+	{"a Microsoft Teams webhook URL", regexp.MustCompile(
+		`\.webhook\.office\.com/webhookb2/[a-f0-9-]{36}@[a-f0-9-]{36}/IncomingWebhook/` +
+			`[a-f0-9]{32}/[a-f0-9-]{36}`)},
 	{"a JWT", regexp.MustCompile(`\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{20,}`)},
 	// The password in a URL, between `://user:` and `@`, unless it is a placeholder: `$VAR`,
 	// `${VAR}`, `<password>`, `****`. Whitespace is ASCII's, \v too, as in `baloo`.
@@ -57,9 +86,11 @@ var kinds = []struct {
 var placeholders = []string{"example", "sample", "xxxxxx", "aaaaaa", "abcde", "00000", "*****"}
 
 var (
-	privateKey = regexp.MustCompile(`-----BEGIN (?:[A-Z]+ )*PRIVATE KEY-----`)
+	privateKey = regexp.MustCompile(`-----BEGIN (?:[A-Z]+ )*PRIVATE KEY(?: BLOCK)?-----`)
+	// A PEM file in base64, as a kubeconfig's client-key-data holds one: "-----BEGIN" encoded.
+	encodedPEM = regexp.MustCompile(`LS0tLS1CRUdJTi[A-Za-z0-9+/]{20,}`)
 	// A run of base64 as a private key's body has it, and a PEM header line before the body.
-	base64    = regexp.MustCompile(`[A-Za-z0-9+/]{40,}`)
+	base64Run = regexp.MustCompile(`[A-Za-z0-9+/]{40,}`)
 	pemHeader = regexp.MustCompile(`^[A-Za-z-]+: `)
 )
 
@@ -169,6 +200,8 @@ func scan(text string) []checks.Finding {
 					} else {
 						key = line
 					}
+				} else if hasEncodedKey(added) {
+					found = append(found, checks.Finding{File: path, Line: line, Reason: "a private key"})
 				} else if what := secret(added); what != "" {
 					found = append(found, checks.Finding{File: path, Line: line, Reason: what})
 				}
@@ -208,11 +241,12 @@ var cloudflare = regexp.MustCompile(`^cf(?:k|ut|at)_[A-Za-z0-9]{40}[a-f0-9]{8}$`
 const base62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 // checksumHolds reports whether a token that ends in a checksum ends in the right one (ADR
-// secrets): a classic GitHub token in the CRC32 of its 30 random characters in base62, padded to
-// 6 with 0, and a Cloudflare one in the CRC32 of its 40 in hex. A match of another kind holds.
+// secrets): a classic GitHub token or an npm one in the CRC32 of its 30 random characters in
+// base62, padded to 6 with 0, and a Cloudflare one in the CRC32 of its 40 in hex. A match of
+// another kind holds.
 func checksumHolds(match string) bool {
 	switch {
-	case strings.HasPrefix(match, "ghp_") && len(match) == 40:
+	case (strings.HasPrefix(match, "ghp_") || strings.HasPrefix(match, "npm_")) && len(match) == 40:
 		sum := crc32.ChecksumIEEE([]byte(match[4:34]))
 		want := []byte("000000")
 		for i := 5; sum > 0; i-- {
@@ -227,10 +261,22 @@ func checksumHolds(match string) bool {
 	return true
 }
 
+// hasEncodedKey reports whether `line` holds a PEM private key in base64. Not one of the kinds, as
+// its base64 holds runs such as AAAAAA that would make it a placeholder.
+func hasEncodedKey(line string) bool {
+	for _, run := range encodedPEM.FindAllString(line, -1) {
+		decoded, _ := base64.StdEncoding.DecodeString(run[:len(run)/4*4])
+		if strings.Contains(string(decoded), "PRIVATE KEY") {
+			return true
+		}
+	}
+	return false
+}
+
 // isBody reports whether `text` holds a private key's body: a run of base64 with a digit, which a
 // long name in code hardly has.
 func isBody(text string) bool {
-	for _, run := range base64.FindAllString(text, -1) {
+	for _, run := range base64Run.FindAllString(text, -1) {
 		if strings.ContainsAny(run, "0123456789") {
 			return true
 		}

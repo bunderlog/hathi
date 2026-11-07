@@ -33,7 +33,7 @@ var fakes = []struct{ what, secret string }{
 	{"an OpenAI API key", "sk-proj-" + strings.Repeat("a1B2", 6) + "T3Blbk" + "FJ" +
 		strings.Repeat("c3D4", 6)},
 	{"a Google API key", "AIza" + strings.Repeat("Sy", 17) + "x"},
-	{"an npm token", "npm_" + strings.Repeat("a1B2c3", 6)},
+	{"an npm token", "npm_" + "Pq3Rs7Tu1Vw5Xy9Za2Bc6De0Fg4Hi8" + "2Cbhyj"}, // checksum as GitHub's
 	{"a PyPI token", "pypi-AgEIcHlw" + "aS5vcmc" + strings.Repeat("a1B2c3", 9)},
 	{"a Docker Hub token", "dckr_pat_" + strings.Repeat("a1B2c3", 5)},
 	{"a Hugging Face token", "hf_" + strings.Repeat("qWeRtYzU", 5)[:34]},
@@ -45,11 +45,44 @@ var fakes = []struct{ what, secret string }{
 	{"an age secret key", "AGE-SECRET-" + "KEY-1" +
 		strings.Repeat("QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L", 2)[:58]},
 	{"a Telegram bot token", "123456789" + ":A" + strings.Repeat("a1B2c3D4e5", 4)[:34]},
+	{"a private key", "-----BEGIN PGP " + "PRIVATE KEY BLOCK-----\\n" + body},
+	{"a private key", "LS0tLS1CRUdJTiBPUEVOU1NI" +
+		"IFBSSVZBVEUgS0VZLS0tLS0KYjNCbGJuTnphQzFyWlhrdGRqRUFBQUFBQkc1dmJtVUFBQUFF" +
+		"Ym05dVpRQUFBQUFBQUFBQkFBQUFNd0FBQUF0emMyZ3RaVwotLS0tLUVORCBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0K"},
+	{"an OpenRouter API key", "sk-or-" + "v1-" + strings.Repeat("a1b2c3d4", 8)},
+	{"a Groq API key", "gsk_" + strings.Repeat("a1B2", 13)},
+	{"an xAI API key", "xai-" + strings.Repeat("a1B2", 20)},
+	{"a Replicate token", "r8_" + strings.Repeat("a1B2", 10)[:37]},
+	{"a Perplexity API key", "pplx-" + strings.Repeat("a1B2", 12)},
+	{"a LangSmith API key", "lsv2_pt_" + strings.Repeat("a1b2", 8) + "_" + "c3d4e5f6a7"},
+	{"a Pinecone API key", "pcsk_" + "a1B2c_" + strings.Repeat("a1B2c3D4e", 7)},
+	{"a webhook signing secret", "whsec_" + strings.Repeat("a1B2", 8)},
+	{"a Supabase token", "sbp_" + strings.Repeat("a1b2c3d4", 5)},
+	{"a Sentry token", "sntryu_" + strings.Repeat("a1b2c3d4", 8)},
+	{"a Fly.io token", "fo1_" + strings.Repeat("a1B2", 11)[:43]},
+	{"a Linear API key", "lin_api_" + strings.Repeat("a1B2", 10)},
+	{"a Notion token", "ntn_" + "48151623420" + strings.Repeat("a1B2", 8) + "c3D"},
+	{"a Figma token", "figd_" + strings.Repeat("a1B2", 10)},
+	{"a Doppler token", "dp.pt." + strings.Repeat("a1B2", 11)[:43]},
+	{"a 1Password token", "ops_eyJ" + strings.Repeat("a1B2", 64)},
+	{"a Heroku API key", "HRKU-AA" + strings.Repeat("a1B2", 15)[:58]},
+	{"a Terraform Cloud token", "a1b2c3d" + "4e5f6a7" + ".atlasv1." + strings.Repeat("c3d4", 16)},
+	{"a Pulumi token", "pul-" + strings.Repeat("a1b2c3d4", 5)},
+	{"a Postman API key", "PMAK-" + strings.Repeat("a1b2", 6) + "-" + strings.Repeat("c3d4", 9)[:34]},
+	{"a New Relic key", "NRAK-" + strings.Repeat("A1B2", 7)[:27]},
+	{"a Databricks token", "dapi" + strings.Repeat("a1b2c3d4", 4)},
+	{"a Discord webhook URL", "https://discord.com/api/" + "webhooks/123456789012345678/" +
+		strings.Repeat("a1B2", 17)},
+	{"a Microsoft Teams webhook URL", "https://acme.webhook.office.com/" + "webhookb2/" + uuid +
+		"@" + uuid + "/IncomingWebhook/" + strings.Repeat("a1b2", 8) + "/" + uuid},
 	{"a JWT", "eyJ" + "hbGciOiJIUzI1NiJ9.eyJ" + "zdWIiOiIxMjM0NTY3ODkwIn0." + strings.Repeat("Sf", 20)},
 	{"a password in a URL", "ftp://dm:" + "hunter2-Pass" + "@10.0.0.1/devices"},
 	{"a password in a URL", "redis://:" + "hunter2" + "@cache:6379"},
 	{"a password in a URL", "cfg://u:" + "hunter2" + "@h"},
 }
+
+// A UUID, as webhook URLs hold them.
+const uuid = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
 
 // A private key's body, base64 as PEM has it.
 var body = strings.Repeat("MIIEvQIBADANBgkqhkiG9w0B", 3)
@@ -100,8 +133,12 @@ func TestCheck_PassesWhatIsNoSecret(t *testing.T) {
 		"ghp_" + "Hn4Kp8Wq2Lr6Tz1Vb5Xc9Md3Gf7Js0" + "09TywX",              // its checksum is 09TywE
 		"cfut_" + "Q8wE2rT6yU1iO5pA9sD3fG7hJ4kL0zX2cV6bN8mQ" + "a25c625d", // a25c625c
 		"npm_" + strings.Repeat("0", 36),
+		"npm_" + "Pq3Rs7Tu1Vw5Xy9Za2Bc6De0Fg4Hi8" + "2Cbhyk", // its checksum is 2Cbhyj
 		"sk-proj-" + strings.Repeat("a1B2", 10),
 		"AKIA" + strings.Repeat("Z7Q8", 4),
+		// A certificate in base64, as a kubeconfig's certificate-authority-data holds it.
+		"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJzekNDQVZtZ0F3SUJBZ0lVWTJWeWRHbG1hV05oZEdVZ1ptOXlJ" +
+			"SFJsYzNSek1Bb0dDQ3FHU000OUJBTUMKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=",
 		"sk_test_" + strings.Repeat("a1B2", 6),
 		"eyJhbGciOiJIUzI1NiJ9 alone",
 		"postgres://user:${DB_PASSWORD}@db/app",
@@ -126,13 +163,15 @@ func TestCheck_FindsAPrivateKeyByItsBody(t *testing.T) {
 		"key.pem": begin + "\n" + body + "\n" + body + "\n-----END PRIVATE KEY-----\n",
 		"old.pem": "-----BEGIN RSA " + "PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\n" +
 			"DEK-Info: AES-128-CBC,0A1B\n\n" + body + "\n",
+		"pgp.asc":  "-----BEGIN PGP " + "PRIVATE KEY BLOCK-----\nVersion: GnuPG v2\n\n" + body + "\n",
 		"parse.go": "const begin = \"" + begin + "\"\nfunc parse() {}\n",
 		"read.go": "const begin = \"" + begin + "\"\n" +
 			"func readThePrivateKeyFromTheGivenBlockAndReturnIt() {}\n",
 	})
 	expect(t, find(t, dir),
 		checks.Finding{File: "key.pem", Line: 1, Reason: "a private key"},
-		checks.Finding{File: "old.pem", Line: 1, Reason: "a private key"})
+		checks.Finding{File: "old.pem", Line: 1, Reason: "a private key"},
+		checks.Finding{File: "pgp.asc", Line: 1, Reason: "a private key"})
 }
 
 // No output holds the Secret (PRD, criterion 10): a Finding has its place and its kind only.
