@@ -1,7 +1,7 @@
 # hathi glossary
 
 `hathi`: commit and repo Checks for Git hooks and CI, as a Go binary. Terms taken from the `baloo`
-plugin keep the meaning its glossary gives them
+plugin and not defined here keep the meaning its glossary gives them
 ([bunderlog/claude-plugins](https://github.com/bunderlog/claude-plugins), `.about/glossary.md`).
 
 **Check**:
@@ -52,11 +52,24 @@ only names one; for a push to a branch other than the default one, `ci` leaves o
 default branch already has.
 _In code_: `checks.Range`
 
+**Secret**:
+A value that grants access: an API key, token, password or private key. A Placeholder, a published
+example or a key meant to be public (a Stripe publishable key) isn't one; `no-secrets-in-commits`
+finds only a Secret of a Kind. An Env file counts as holding Secrets unless an Allow mark is on its
+first line.
+_Avoid_: credential, key (alone)
+
+**Env file**:
+A file of environment settings a program or shell loads: `.env`, `.env.local`, `prod.env`,
+direnv's `.envrc`… A template of one (`.env.example`, `.sample`, `.template`, `.dist`) isn't one.
+_In code_: `secrets.IsEnvFile`
+
 **Kind**:
-A form of Secret with a published format and a prefix that hardly anything else has, such as an
-AWS access key or a GitHub token (ADR secrets); its name is the reason of a Finding on it. Not an
-Env file, which `no-secrets-in-commits` finds by its name, not by what it holds.
-_In code_: `secrets.kinds`, `secrets.checksummed`
+A form of Secret with a published format that hardly anything else shares (ADR secrets): a prefix,
+such as an AWS access key's `AKIA` or a GitHub token's `ghp_`, or a fixed shape, such as a private
+key's PEM body or a password between `://user:` and `@`. Its name is the reason of a Finding on it.
+Not an Env file, which `no-secrets-in-commits` finds by its name, not by what it holds.
+_In code_: `secrets.kinds`, `secrets.checksummed`, and a private key apart in `secrets.scan`
 
 **Placeholder**:
 A match of a Kind that is no real Secret, and passes: it holds a word such as `example` or

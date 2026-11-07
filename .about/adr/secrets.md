@@ -2,12 +2,12 @@
 
 Date: 2026-11-07
 
-`no-secrets-in-commits` finds Env files by their name, and Secrets of a kind with a published
-format whose prefix hardly ever matches anything else (`AKIA`, `ghp_`, `sk-ant-`). A new kind is
-added only on those terms; entropy and generic rules, such as gitleaks' `generic-api-key`, are
-not. A project that needs deeper scanning runs gitleaks beside `hathi`, in its own Git hooks and
-CI: `hathi` neither runs gitleaks nor links it, so a commit gets the same Verdict on every machine
-and the binary keeps its few dependencies.
+`no-secrets-in-commits` finds Env files by their name, and Secrets of a Kind: a published format
+that hardly anything else shares, by its prefix (`AKIA`, `ghp_`, `sk-ant-`) or its fixed shape (a
+private key's body, a password in a URL). A new Kind is added only on those terms; entropy and
+generic rules, such as gitleaks' `generic-api-key`, are not. A project that needs deeper scanning
+runs gitleaks beside `hathi`, in its own Git hooks and CI: `hathi` neither runs gitleaks nor links
+it, so a commit gets the same Verdict on every machine and the binary keeps its few dependencies.
 
 A match is a Secret only if it isn't a Placeholder: one holding `example`, `sample`, `xxxxxx`,
 `aaaaaa`, `abcde`, `00000` or `*****`, in any case, passes, as trufflehog's filter does, so AWS's
