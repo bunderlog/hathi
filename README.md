@@ -39,14 +39,19 @@ git config core.hooksPath .githooks
 ```
 
 In GitHub Actions, `hathi check ci` finds the new commits of the push or PR by itself, given the
-full history; elsewhere, `hathi check --range "$BASE..$HEAD"`:
+full history, and needs no more than read access; elsewhere, `hathi check --range "$BASE..$HEAD"`.
+Pin each action to a commit SHA, as `.github/workflows/` here does:
 
 ```yaml
-- uses: actions/checkout@v7
-  with:
-    fetch-depth: 0
-- uses: jdx/mise-action@v5
-- run: hathi check ci
+permissions:
+  contents: read
+steps:
+  - uses: actions/checkout@v7
+    with:
+      fetch-depth: 0
+      persist-credentials: false
+  - uses: jdx/mise-action@v5
+  - run: hathi check ci
 ```
 
 Every Check is on without settings; `hathi config --default > .hathi.yml` writes them all out to

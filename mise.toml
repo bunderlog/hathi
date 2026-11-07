@@ -11,7 +11,7 @@ zizmor = "1.32.0"
 run = "go test ./..."
 
 [tasks.lint]
-run = ["golangci-lint run", "actionlint", "zizmor --offline --no-progress .github/workflows"]
+run = ["golangci-lint run", "actionlint", "zizmor --offline --no-progress ."]
 
 [tasks.check]
 depends = ["lint", "test"]

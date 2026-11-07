@@ -15,6 +15,8 @@ jobs:
           fetch-depth: 0 # hathi check ci reads the history
           persist-credentials: false
       - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          version: 2026.11.3
       - run: mise run check
       # hathi checks its own commits.
       - run: go run . check ci

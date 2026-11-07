@@ -13,9 +13,12 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      # No cache, which a run on any branch could have written, in what builds the Release.
+      # What builds the Release: a pinned mise, the tools it runs checked against mise.lock, and no
+      # cache, which a run of ci.yml on main could have written.
       - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
+          version: 2026.11.3
+          install_args: go goreleaser
           cache: false
       - run: mise exec -- goreleaser release --clean
         env:
@@ -32,6 +35,7 @@ jobs:
     steps:
       - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
+          version: 2026.11.3
           install: false
           cache: false
       - run: |
