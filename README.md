@@ -63,6 +63,8 @@ the repo runs `hathi`, and `hathi help` lists the rest.
 `no-secrets-in-commits` finds Env files and the kinds of key with a prefix of their own, such as
 AWS's or GitHub's. For more, run [gitleaks](https://github.com/gitleaks/gitleaks) beside `hathi`,
 and keep both on: only `hathi` flags an Env file. `gitleaks:allow` marks a false alarm for both.
+On GitHub, turn on secret scanning and push protection as well (free for a public repo): GitHub
+then also rejects a push that holds a token it knows, server-side.
 
 ```toml
 [tools]

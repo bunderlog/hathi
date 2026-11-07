@@ -63,7 +63,8 @@ var kinds = []struct {
 	{"a Linear API key", regexp.MustCompile(`\blin_api_[A-Za-z0-9]{40}\b`)},
 	{"a Notion token", regexp.MustCompile(`\bntn_[0-9]{11}[A-Za-z0-9]{35}\b`)},
 	{"a Figma token", regexp.MustCompile(`\bfigd_[A-Za-z0-9_-]{40}`)},
-	{"a Doppler token", regexp.MustCompile(`\bdp\.pt\.[A-Za-z0-9]{43}\b`)},
+	{"a Doppler token", regexp.MustCompile(
+		`\bdp\.(?:ct|pt|st(?:\.[a-z0-9_-]{2,35})?|sa|scim|audit)\.[A-Za-z0-9]{40,44}\b`)},
 	{"a 1Password token", regexp.MustCompile(`\bops_eyJ[A-Za-z0-9+/]{250,}`)},
 	{"a Heroku API key", regexp.MustCompile(`\bHRKU-AA[0-9A-Za-z_-]{58}`)},
 	{"a Terraform Cloud token", regexp.MustCompile(`\b[a-z0-9]{14}\.atlasv1\.[a-z0-9_=-]{60,70}`)},
@@ -76,6 +77,27 @@ var kinds = []struct {
 	{"a Microsoft Teams webhook URL", regexp.MustCompile(
 		`\.webhook\.office\.com/webhookb2/[a-f0-9-]{36}@[a-f0-9-]{36}/IncomingWebhook/` +
 			`[a-f0-9]{32}/[a-f0-9-]{36}`)},
+	{"a Grafana token", regexp.MustCompile(`\b(?:glsa_[A-Za-z0-9]{32}_[A-Fa-f0-9]{8}\b|` +
+		`glc_[A-Za-z0-9+/]{32,400}|eyJrIjoi[A-Za-z0-9]{70,400})`)},
+	{"a Tailscale key", regexp.MustCompile(`\btskey-[a-z]+-[0-9A-Za-z_]+-[0-9A-Za-z_]{20,}`)},
+	{"a CircleCI token", regexp.MustCompile(`\bCCIPAT_[A-Za-z0-9]{22}_[a-fA-F0-9]{40}\b`)},
+	{"a Buildkite token", regexp.MustCompile(`\bbkua_[a-z0-9]{40}\b`)},
+	{"a Docker Swarm token", regexp.MustCompile(
+		`\b(?:SWMTKN-1-[0-9a-z]{50}-[0-9a-z]{25}\b|SWMKEY-1-[A-Za-z0-9+/]{43})`)},
+	{"a Dynatrace token", regexp.MustCompile(`\bdt0c01\.[A-Za-z0-9]{24}\.[A-Za-z0-9]{64}\b`)},
+	{"a RubyGems key", regexp.MustCompile(`\brubygems_[a-f0-9]{48}\b`)},
+	{"a Clojars token", regexp.MustCompile(`\bCLOJARS_[a-z0-9]{60}\b`)},
+	{"a PostHog personal API key", regexp.MustCompile(`\bphx_[A-Za-z0-9_]{43,48}\b`)},
+	{"a Sourcegraph token", regexp.MustCompile(`\bsgp_(?:[a-fA-F0-9]{16}_|local_)?[a-fA-F0-9]{40}\b`)},
+	{"a Mapbox secret token", regexp.MustCompile(`\bsk\.eyJ[A-Za-z0-9._-]{80,240}`)},
+	{"a PlanetScale token", regexp.MustCompile(`\bpscale_(?:tkn|oauth|pw)_[\w=.-]{32,64}`)},
+	{"a Prefect key", regexp.MustCompile(`\bpnu_[A-Za-z0-9]{36}\b`)},
+	{"a ReadMe API key", regexp.MustCompile(`\brdme_[a-z0-9]{70}\b`)},
+	{"a Contentful token", regexp.MustCompile(`\bCFPAT-[A-Za-z0-9_-]{43}`)},
+	{"a Typeform token", regexp.MustCompile(`\btfp_[A-Za-z0-9_]{40,59}\b`)},
+	// Resend's keys are base58: no 0, O, I or l.
+	{"a Resend API key", regexp.MustCompile(`\bre_[1-9A-HJ-NP-Za-km-z]{8}_[1-9A-HJ-NP-Za-km-z]{24}\b`)},
+	{"a Shippo live token", regexp.MustCompile(`\bshippo_live_[a-fA-F0-9]{40}\b`)},
 	{"a JWT", regexp.MustCompile(`\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{20,}`)},
 	// The password in a URL, between `://user:` and `@`, unless it is a placeholder: `$VAR`,
 	// `${VAR}`, `<password>`, `****`. Whitespace is ASCII's, \v too, as in `baloo`.

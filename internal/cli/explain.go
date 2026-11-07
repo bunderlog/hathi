@@ -38,12 +38,15 @@ no-ai-coauthor: false in .hathi.yml turns it off.
 	"no-secrets-in-commits": `no-secrets-in-commits (pre-commit) looks for a Secret on a line the
 changes add and for an Env file they add or change, such as .env, .env.local or .envrc; a
 template of one (.example, .sample, .template, .dist) passes. A Secret is a private key with its
-body, in PEM, PGP or base64; a key or token with a prefix of its own from AWS, GitHub, GitLab,
-Slack, Stripe (live), Anthropic, OpenAI, OpenRouter, Groq, xAI, Replicate, Perplexity, LangSmith,
-Pinecone, Google, Cloudflare, Atlassian, npm, PyPI, Docker Hub, Hugging Face, SendGrid,
-DigitalOcean, Shopify, Vault, age, Telegram, Supabase, Sentry, Fly.io, Linear, Notion, Figma,
-Doppler, 1Password, Heroku, Terraform Cloud, Pulumi, Postman, New Relic or Databricks; a webhook
-signing secret; a Slack, Discord or Microsoft Teams webhook URL; a JWT; a password in a URL. A
+body, in PEM, PGP or base64; a key or token with a prefix of its own from a cloud (AWS, Google,
+Cloudflare, DigitalOcean, Fly.io, Heroku, Supabase, PlanetScale, Databricks, Vault, Doppler,
+1Password, Tailscale, Terraform Cloud, Pulumi), a code host, registry or CI (GitHub, GitLab,
+Atlassian, npm, PyPI, RubyGems, Clojars, Docker Hub, Docker Swarm, CircleCI, Buildkite, Hugging
+Face, Sourcegraph), an AI provider (Anthropic, OpenAI, OpenRouter, Groq, xAI, Replicate,
+Perplexity, LangSmith, Pinecone) or a service (Stripe live, Shopify, Shippo live, Slack,
+Telegram, SendGrid, Resend, Sentry, Grafana, New Relic, Dynatrace, PostHog, Linear, Notion,
+Figma, Contentful, Typeform, Postman, ReadMe, Prefect, Mapbox); an age key; a webhook signing
+secret; a Slack, Discord or Microsoft Teams webhook URL; a JWT; a password in a URL. A
 placeholder passes, such as AWS's documented example key, one of x's, or a GitHub, npm,
 Cloudflare or Atlassian token whose checksum fails. It names where, never the Secret itself.
 
