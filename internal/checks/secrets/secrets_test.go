@@ -20,6 +20,9 @@ var fakes = []struct{ what, secret string }{
 	// The last 6 characters are the base62 CRC32 of the 30 before them, worked out apart.
 	{"a GitHub token", "ghp_" + "Z7q2W9x4K1m8R3t6Y5u0P2s7D4f9G1" + "0F19eW"},
 	{"a GitHub token", "github_pat_" + strings.Repeat("A_b1", 16)},
+	// Cloudflare's last 8 characters are the hex CRC32 of the 40 before them, worked out apart.
+	{"a Cloudflare token", "cfut_" + "Q8wE2rT6yU1iO5pA9sD3fG7hJ4kL0zX2cV6bN8mQ" + "a25c625c"},
+	{"a Cloudflare token", "cfk_" + "M3nB7vC1xZ5lK9jH2gF6dS0aP4oI8uY3tR7eW1qA" + "9e0665fc"},
 	{"a GitLab token", "glpat-" + strings.Repeat("a1B2c", 4)},
 	{"a Slack token", "xoxb-" + "1234567890-abc"},
 	{"a Slack token", "xapp-" + "1-A0B1C2D3E4F-123"},
@@ -45,6 +48,7 @@ var fakes = []struct{ what, secret string }{
 	{"a JWT", "eyJ" + "hbGciOiJIUzI1NiJ9.eyJ" + "zdWIiOiIxMjM0NTY3ODkwIn0." + strings.Repeat("Sf", 20)},
 	{"a password in a URL", "ftp://dm:" + "hunter2-Pass" + "@10.0.0.1/devices"},
 	{"a password in a URL", "redis://:" + "hunter2" + "@cache:6379"},
+	{"a password in a URL", "cfg://u:" + "hunter2" + "@h"},
 }
 
 // A private key's body, base64 as PEM has it.
@@ -93,7 +97,8 @@ func TestCheck_PassesWhatIsNoSecret(t *testing.T) {
 		// Placeholders, and a match without its kind's marker.
 		"AKIA" + "IOSFODNN7EXAMPLE",
 		"ghp_" + strings.Repeat("x", 36),
-		"ghp_" + "Hn4Kp8Wq2Lr6Tz1Vb5Xc9Md3Gf7Js0" + "09TywX", // its checksum is 09TywE
+		"ghp_" + "Hn4Kp8Wq2Lr6Tz1Vb5Xc9Md3Gf7Js0" + "09TywX",              // its checksum is 09TywE
+		"cfut_" + "Q8wE2rT6yU1iO5pA9sD3fG7hJ4kL0zX2cV6bN8mQ" + "a25c625d", // a25c625c
 		"npm_" + strings.Repeat("0", 36),
 		"sk-proj-" + strings.Repeat("a1B2", 10),
 		"AKIA" + strings.Repeat("Z7Q8", 4),

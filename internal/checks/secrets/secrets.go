@@ -2,6 +2,7 @@
 package secrets
 
 import (
+	"fmt"
 	"hash/crc32"
 	"regexp"
 	"strconv"
@@ -22,6 +23,7 @@ var kinds = []struct {
 }{
 	{"an AWS access key", regexp.MustCompile(`\b(?:AKIA|ASIA|ABIA|ACCA)[A-Z2-7]{16}\b`)},
 	{"a GitHub token", regexp.MustCompile(`\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{60,})`)},
+	{"a Cloudflare token", regexp.MustCompile(`\bcf(?:k|ut|at)_[A-Za-z0-9]{40}[a-f0-9]{8}\b`)},
 	{"a GitLab token", regexp.MustCompile(
 		`\bgl(?:pat|dt|rt|cbt|ptt|ft|imt|agent|oas|soat|ffct)-[0-9A-Za-z_.-]{20,}`)},
 	{"a Slack webhook URL", regexp.MustCompile(
@@ -199,23 +201,30 @@ func isPlaceholder(match string) bool {
 	return false
 }
 
+// cloudflare is a whole Cloudflare token: its prefix, 40 characters and its checksum.
+var cloudflare = regexp.MustCompile(`^cf(?:k|ut|at)_[A-Za-z0-9]{40}[a-f0-9]{8}$`)
+
 // base62 is the alphabet of a GitHub token's checksum.
 const base62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
-// checksumHolds reports whether a classic GitHub token ends in the checksum of its 30 random
-// characters: their CRC32 in base62, padded to 6 with 0 (ADR secrets). A match of another kind
-// holds.
+// checksumHolds reports whether a token that ends in a checksum ends in the right one (ADR
+// secrets): a classic GitHub token in the CRC32 of its 30 random characters in base62, padded to
+// 6 with 0, and a Cloudflare one in the CRC32 of its 40 in hex. A match of another kind holds.
 func checksumHolds(match string) bool {
-	if !strings.HasPrefix(match, "ghp_") || len(match) != 40 {
-		return true
+	switch {
+	case strings.HasPrefix(match, "ghp_") && len(match) == 40:
+		sum := crc32.ChecksumIEEE([]byte(match[4:34]))
+		want := []byte("000000")
+		for i := 5; sum > 0; i-- {
+			want[i] = base62[sum%62]
+			sum /= 62
+		}
+		return match[34:] == string(want)
+	case cloudflare.MatchString(match):
+		body, sum := match[len(match)-48:len(match)-8], match[len(match)-8:]
+		return sum == fmt.Sprintf("%08x", crc32.ChecksumIEEE([]byte(body)))
 	}
-	sum := crc32.ChecksumIEEE([]byte(match[4:34]))
-	want := []byte("000000")
-	for i := 5; sum > 0; i-- {
-		want[i] = base62[sum%62]
-		sum /= 62
-	}
-	return match[34:] == string(want)
+	return true
 }
 
 // isBody reports whether `text` holds a private key's body: a run of base64 with a digit, which a

@@ -37,11 +37,12 @@ no-ai-coauthor: false in .hathi.yml turns it off.
 `,
 	"no-secrets-in-commits": `no-secrets-in-commits (pre-commit) looks for a Secret on a line the
 changes add (a private key with its body; a key or token of AWS, GitHub, GitLab, Slack, Stripe
-live, Anthropic, OpenAI, Google, npm, PyPI, Docker Hub, Hugging Face, SendGrid, DigitalOcean,
-Shopify, Vault, age or a Telegram bot; a Slack webhook URL, a JWT, a password in a URL) and for an
-Env file they add or change, such as .env, .env.local or .envrc; a template of one (.example,
-.sample, .template, .dist) passes, and so does a placeholder such as AWS's documented example key,
-one of x's, or a ghp_ token whose checksum fails. It names where, never the Secret itself.
+live, Anthropic, OpenAI, Google, Cloudflare, npm, PyPI, Docker Hub, Hugging Face, SendGrid,
+DigitalOcean, Shopify, Vault, age or a Telegram bot; a Slack webhook URL, a JWT, a password in a
+URL) and for an Env file they add or change, such as .env, .env.local or .envrc; a template of one
+(.example, .sample, .template, .dist) passes, and so does a placeholder such as AWS's documented
+example key, one of x's, or a ghp_ or Cloudflare token whose checksum fails. It names where, never
+the Secret itself.
 
 To fix it, remove the Secret from the change and keep it in the environment or a secret store;
 one already pushed is out, so revoke it too. Keep an Env file out of Git, or commit a template.

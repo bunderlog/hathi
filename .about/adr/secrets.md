@@ -22,6 +22,11 @@ characters in base62 (`0-9A-Za-z`), padded to 6 with `0`, which a real, revoked 
 theirs has confirmed it, and a fine-grained `github_pat_` has none; they are found without it,
 since a wrong guess would pass real tokens.
 
+A Cloudflare token (`cfk_`, `cfut_`, `cfat_`, then 40 characters) ends in the CRC32 of those 40
+in 8 lowercase hex digits. Cloudflare documents the three formats and a CRC32 suffix, and a real
+`cfat_` token confirmed the encoding on 2026-11-07, so all three are checked and one whose checksum
+fails passes.
+
 A project that adds gitleaks keeps `no-secrets-in-commits` on: gitleaks doesn't flag an Env file by
 its name. A Secret both find is reported twice. `gitleaks:allow` marks a false alarm for `hathi`
 too, so one mark serves both; gitleaks takes only its own.
