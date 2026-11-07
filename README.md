@@ -85,8 +85,9 @@ exec gitleaks git --pre-commit --staged --redact --verbose
 ## Development
 
 `mise run check` lints (golangci-lint with gofmt and goimports, actionlint, zizmor) and tests; a
-tag `v<version>` makes the Release. `baloo`'s Git hooks also run gitleaks and the lint before a
-commit, and the tests before a push (`.claude/baloo.yml`).
+tag `v<version>` makes the Release. The repo runs `hathi` on itself: its Git hooks in `.githooks/`
+run the release `mise.toml` pins, gitleaks and the lint before a commit, and the tests before a
+push, once `git config core.hooksPath .githooks` turns them on; CI checks with the source.
 
 ## GitHub repo
 

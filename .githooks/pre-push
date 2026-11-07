@@ -1,0 +1,3 @@
+#!/bin/sh
+hathi check pre-push "$@" || exit
+exec mise run test

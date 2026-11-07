@@ -28,9 +28,8 @@ session-review: true
 # The project's own commands, by Git hook (pre-commit, commit-msg, pre-push), that the plugin's Git
 # hook runs with sh after its Checks pass, with git's arguments as $1 and, for pre-push, the pushed
 # refs on stdin; the commit or push fails when the command does. Off without it, or with false.
-git-hook-commands:
-  pre-commit: gitleaks git --pre-commit --staged --redact --verbose --no-banner && mise run lint
-  pre-push: mise run test
+# git-hook-commands:
+#   pre-commit: mise run test
 
 # Guidelines, the plugin's working rules: each one on is named to Claude at session start, for
 # Claude to read when a task calls for it, but typescript, vue and testing, which Claude is given
@@ -62,11 +61,12 @@ claude-hooks:
 # where at least one of their Checks is on. conventional-commits also takes its settings instead
 # of true, such as { types: [feat, fix], max-length: 72 }; types: any takes any type,
 # max-length: 0 any length. no-large-files takes { max-size: 5000 }, in KB; 1024 without it.
+# hathi runs these Checks in .githooks/ instead, so the plugin writes no Git hook here.
 git-hooks:
-  conventional-commits: true
-  linear-history: true
-  no-ai-coauthor: true
-  no-conflict-markers: true
-  no-large-files: true
-  no-secrets-in-commits: true
-  no-stale-adr-date: true
+  conventional-commits: false
+  linear-history: false
+  no-ai-coauthor: false
+  no-conflict-markers: false
+  no-large-files: false
+  no-secrets-in-commits: false
+  no-stale-adr-date: false

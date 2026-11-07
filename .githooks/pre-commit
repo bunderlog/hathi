@@ -1,0 +1,4 @@
+#!/bin/sh
+hathi check pre-commit "$@" || exit
+gitleaks git --pre-commit --staged --redact --verbose --no-banner || exit
+exec mise run lint
