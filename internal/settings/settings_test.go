@@ -63,7 +63,7 @@ linear-history: false
 // Criterion 7: an unknown key or a bad value is a Problem with its line; the other settings
 // still apply.
 func TestParse_TellsEachProblemByItsLine(t *testing.T) {
-	got, problems := Parse(`no-stale-adr-date: true
+	got, problems := Parse(`no-stale-adr-date: on
 no-secrets: true
 conventional-commits:
   types: [feat, 1]
@@ -76,7 +76,7 @@ no-ai-coauthor: off
 linear-history: false
 `)
 	want := []Problem{
-		{1, `"no-stale-adr-date" is not a setting of hathi: it stays in baloo`},
+		{1, "no-stale-adr-date is not true or false"},
 		{2, `"no-secrets" is not a setting`},
 		{4, "conventional-commits: types is not a list of strings or any"},
 		{5, "conventional-commits: scopes holds none: use any for any"},

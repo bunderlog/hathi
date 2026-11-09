@@ -66,6 +66,10 @@
         }
       ]
     },
+    "no-stale-adr-date": {
+      "description": "pre-commit: each ADR in .about/adr/ the changes edit has its Date set to the day of the change.",
+      "type": "boolean"
+    },
     "linear-history": {
       "description": "pre-push: the push sends no merge commit.",
       "type": "boolean"

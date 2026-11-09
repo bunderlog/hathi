@@ -20,7 +20,7 @@ const File = ".hathi.yml"
 // Checks are the Checks' names, each a key of the Settings, in the order the PRD lists them.
 var Checks = []string{
 	"conventional-commits", "no-ai-coauthor", "no-secrets-in-commits", "no-conflict-markers",
-	"no-large-files", "linear-history",
+	"no-large-files", "no-stale-adr-date", "linear-history",
 }
 
 // Settings are what a repo sets for `hathi`.
@@ -76,11 +76,7 @@ func Parse(text string) (Settings, []Problem) {
 	for i := 0; i+1 < len(root.Content); i += 2 {
 		key, value := root.Content[i], root.Content[i+1]
 		name := key.Value
-		switch {
-		case name == "no-stale-adr-date":
-			problem(key, "%q is not a setting of hathi: it stays in baloo", name)
-			continue
-		case !slices.Contains(Checks, name):
+		if !slices.Contains(Checks, name) {
 			problem(key, "%q is not a setting", name)
 			continue
 		}
@@ -223,6 +219,9 @@ no-conflict-markers: true
 no-large-files:
   # The largest file a commit may add, in KB of 1024 bytes.
   max-size: 1024
+
+# pre-commit: each ADR in .about/adr/ the changes edit has its Date set to the day of the change.
+no-stale-adr-date: true
 
 # pre-push: the push sends no merge commit.
 linear-history: true

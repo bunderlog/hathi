@@ -141,7 +141,8 @@ func TestRange_PrintsEachVerdictInJSON(t *testing.T) {
 	}
 	want := []string{
 		"conventional-commits pass", "no-ai-coauthor pass", "no-secrets-in-commits fail",
-		"no-conflict-markers pass", "no-large-files pass", "linear-history pass",
+		"no-conflict-markers pass", "no-large-files pass", "no-stale-adr-date pass",
+		"linear-history pass",
 	}
 	if got.code != 1 || len(verdicts) != len(want) {
 		t.Fatalf("got %d and %v, want 1 and %v", got.code, verdicts, want)

@@ -30,6 +30,7 @@ The Checks that are about commits and the repo, as `baloo` v0.34.0 defines them 
 | `no-secrets-in-commits` | pre-commit | staged changes that add a Secret or an Env file; an Allow mark (`hathi:allow-secret`) passes a false alarm |
 | `no-conflict-markers` | pre-commit | staged changes that add a conflict marker |
 | `no-large-files` | pre-commit | a new file over `max-size` |
+| `no-stale-adr-date` | pre-commit | an ADR in `.about/adr/` the changes edit without setting its Date to the day of the change |
 | `linear-history` | pre-push | a push that sends a merge commit |
 
 Each Check's rules are `baloo`'s code in `plugins/baloo/scripts/baloo/checks/` at v0.34.0, the
@@ -56,8 +57,12 @@ Check without its key is on with its defaults, unlike in `baloo`. The settings a
 
 `types: any` and `scopes: any` are the string, not a list, a `scopes` list holds at least one,
 and `max-size` is at least 1.
-`no-stale-adr-date` copied from a `baloo.yml` is an unknown key, whose error says it stays in
-`baloo`. `hathi config --default` prints the `$schema` line first (ADR config).
+`hathi config --default` prints the `$schema` line first (ADR config).
+
+`no-stale-adr-date` came over on 2026-11-09, so that a project whose Git hooks run `hathi` keeps
+it once `baloo` writes no Git hook (PRD harness in `bunderlog/claude-plugins`): its rules are
+`baloo`'s `checks/adr.py` at v0.35.0, with the day of the change being today for staged changes
+and a commit's committer date for a commit in a Range.
 
 ## Command line
 
@@ -167,7 +172,6 @@ semantic-release do those).
 
 ## Non-goals
 
-- `no-stale-adr-date` — about `.about/`, stays in `baloo`.
 - Reading a commitlint config. A project that needs commitlint's plugins or shared configs runs
   commitlint and turns `conventional-commits` off.
 - Installing Git hooks. The project wires `hathi` into its own hooks (ADR hooks); `hathi` only runs
@@ -277,3 +281,11 @@ semantic-release do those).
     internal/checks/secrets/secrets_test.go "TestCheck_PassesWhatIsNoSecret";
     internal/checks/secrets/secrets_test.go "TestCheck_FindsAPrivateKeyByItsBody";
     internal/checks/secrets/secrets_test.go "TestCheck_PassesWhatGitleaksAllowMarks"
+14. `no-stale-adr-date` fails staged changes that edit an ADR in `.about/adr/` whose Date isn't
+    today, or that has no Date line, naming the file and the Date line; a new, deleted or renamed
+    ADR and a file beside the ADRs pass; a commit in a Range is held to its committer date. Each
+    test of `test_adr.py` in `bunderlog/claude-plugins` at v0.35.0 is named in a `// baloo:`
+    comment, as in criterion 10.
+    → test: internal/checks/adrdate/adrdate_test.go "TestCheck_FindsAnADRChangedUnderAnOldDate";
+    internal/checks/adrdate/adrdate_test.go "TestCheck_PassesWhatIsNotAChangedADR";
+    internal/checks/adrdate/adrdate_test.go "TestCheck_HoldsACommitToItsCommitterDate"

@@ -11,8 +11,10 @@ import (
 	"runtime/debug"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/bunderlog/hathi/internal/checks"
+	"github.com/bunderlog/hathi/internal/checks/adrdate"
 	"github.com/bunderlog/hathi/internal/checks/coauthor"
 	"github.com/bunderlog/hathi/internal/checks/commit"
 	"github.com/bunderlog/hathi/internal/checks/conflict"
@@ -29,7 +31,7 @@ var Hooks = []string{"commit-msg", "pre-commit", "pre-push"}
 func all(s settings.Settings) []checks.Check {
 	return []checks.Check{
 		commit.Check(s.Commit), coauthor.Check, secrets.Check, conflict.Check, size.Check(s.MaxSize),
-		history.Check,
+		adrdate.Check(time.Now().Format(time.DateOnly)), history.Check,
 	}
 }
 
