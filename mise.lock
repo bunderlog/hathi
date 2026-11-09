@@ -20,21 +20,21 @@ url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/3849248
 provenance = "github-attestations"
 
 [[tools."github:bunderlog/hathi"]]
-version = "1.1.0"
+version = "1.2.0"
 backend = "github:bunderlog/hathi"
-specifiers = ["1.1.0"]
+specifiers = ["1.2.0"]
 
 [tools."github:bunderlog/hathi"."platforms.linux-x64"]
-checksum = "sha256:d810fffbbcf3293627efcc1c0e73c7ac1818f66e4d3749875e05651cbfeb283d"
+checksum = "sha256:e2e75865328a96adaacac86d32a4c890228a42a89acbc4dabb2c4ce891ce1ebd"
 checksum_source = "mise-versions"
-url = "https://github.com/bunderlog/hathi/releases/download/v1.1.0/hathi_1.1.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/bunderlog/hathi/releases/assets/720687542"
+url = "https://github.com/bunderlog/hathi/releases/download/v1.2.0/hathi_1.2.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/bunderlog/hathi/releases/assets/728733661"
 
 [tools."github:bunderlog/hathi"."platforms.macos-arm64"]
-checksum = "sha256:2ecf903b1b1a07a8b8ad615efaec8df7bde3e12f46e164470df8390d512aa206"
+checksum = "sha256:c9096bb9ad54d8c1a9ddc5dc7935c57a627aa7a2a14f2a960c2bab218e505030"
 checksum_source = "mise-versions"
-url = "https://github.com/bunderlog/hathi/releases/download/v1.1.0/hathi_1.1.0_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/bunderlog/hathi/releases/assets/720687541"
+url = "https://github.com/bunderlog/hathi/releases/download/v1.2.0/hathi_1.2.0_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/bunderlog/hathi/releases/assets/728733659"
 
 [[tools.gitleaks]]
 version = "8.30.1"

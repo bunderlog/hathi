@@ -23,7 +23,7 @@ and `mise install` fails.
 
 ```toml
 [tools]
-"github:bunderlog/hathi" = "1.1.0"
+"github:bunderlog/hathi" = "1.2.0"
 ```
 
 Commit the Git hooks, and turn them on once per clone. `.githooks/commit-msg` is below;
@@ -75,7 +75,7 @@ gitleaks = "8.30.1"
 #!/bin/sh
 # .githooks/pre-commit
 hathi check pre-commit "$@" || exit
-exec gitleaks git --pre-commit --staged --redact --verbose
+exec gitleaks git --pre-commit --staged --redact --verbose --no-banner
 ```
 
 ```yaml

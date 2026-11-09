@@ -6,14 +6,16 @@
 # The Output style for Claude's replies, picked at session start in the settings file that
 # enables the plugin (the project's .claude/settings.local.json for the user's settings), where no
 # settings file of Claude Code's picks one; false picks none.
-output-style: short-replies
+# Off while baloo still has a Config: the Output style and the Status line are each person's own,
+# in ~/.claude/settings.json (PRD project-setup in bunderlog/claude-plugins).
+output-style: false
 
 # The plugin's Status line, set at session start in .claude/settings.local.json, where no
 # settings file of Claude Code's but the user's own sets one; false takes it out. Instead of
 # true it also takes its bars, in the order shown, and the percentages at which each turns yellow
 # and red, such as { bars: [context, 5h], thresholds: { context: { yellow: 30, red: 50 } } };
 # cache's are of the cache's lifetime left, so red is below yellow.
-status-line: true
+status-line: false
 
 # The Session review: when a session ends, a separate Claude session proposes, in .about/proposals/,
 # changes to .about/ for what the conversation settled or left open but nobody wrote down; a
@@ -61,7 +63,8 @@ claude-hooks:
 # where at least one of their Checks is on. conventional-commits also takes its settings instead
 # of true, such as { types: [feat, fix], max-length: 72 }; types: any takes any type,
 # max-length: 0 any length. no-large-files takes { max-size: 5000 }, in KB; 1024 without it.
-# hathi runs these Checks in .githooks/ instead, so the plugin writes no Git hook here.
+# hathi runs these Checks in .githooks/ instead, no-stale-adr-date too since 1.2.0, so the plugin
+# writes no Git hook here.
 git-hooks:
   conventional-commits: false
   linear-history: false

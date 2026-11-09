@@ -1,7 +1,8 @@
 # hathi
 
 Commit and repo Checks for Git hooks and CI, as a Go binary. What it is: [README.md](README.md).
-Check a change with `mise run check`.
+Check a change with `mise run check`. Commit messages follow `.hathi.yml`, which the Git hooks
+check: @.hathi.yml
 
 ## Where things are decided
 
