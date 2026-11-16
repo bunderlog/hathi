@@ -12,7 +12,8 @@
     }
   },
   "enabledPlugins": {
-    "baloo@bunderlog": true
+    "baloo@bunderlog": true,
+    "louie@bunderlog": true
   },
   "permissions": {
     "deny": [
@@ -31,5 +32,6 @@
       "Read(~/.ssh/id_*)",
       "Read(~/.aws/credentials)"
     ]
-  }
+  },
+  "enableWorkflows": true
 }
