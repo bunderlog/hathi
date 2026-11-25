@@ -99,6 +99,7 @@ var fakes = []struct{ what, secret string }{
 	{"a Typeform token", "tfp_" + strings.Repeat("a1B2", 11)},
 	{"a Resend API key", "re_" + "Ab3Cd5Ef" + "_" + strings.Repeat("Gh7Jk9Mn", 3)},
 	{"a Shippo live token", "shippo_live_" + strings.Repeat("a1b2c3d4", 5)},
+	{"a People Data Labs API key", "pdl_sdbx_" + "apikey_" + strings.Repeat("a1B2", 8)},
 	{"a JWT", "eyJ" + "hbGciOiJIUzI1NiJ9.eyJ" + "zdWIiOiIxMjM0NTY3ODkwIn0." + strings.Repeat("Sf", 20)},
 	{"a password in a URL", "ftp://dm:" + "hunter2-Pass" + "@10.0.0.1/devices"},
 	{"a password in a URL", "redis://:" + "hunter2" + "@cache:6379"},

@@ -98,6 +98,9 @@ var kinds = []struct {
 	{"a Resend API key", regexp.MustCompile(
 		`\bre_[1-9A-HJ-NP-Za-km-z]{8}_[1-9A-HJ-NP-Za-km-z]{24}\b`)},
 	{"a Shippo live token", regexp.MustCompile(`\bshippo_live_[a-fA-F0-9]{40}\b`)},
+	// People Data Labs publishes no format: this is the prefix of a real sandbox key, `sdbx` taken
+	// as its environment, and a length that leaves out a short Placeholder.
+	{"a People Data Labs API key", regexp.MustCompile(`\bpdl_[a-z]+_apikey_[A-Za-z0-9_-]{16,}`)},
 	{"a JWT", regexp.MustCompile(
 		`\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{20,}`)},
 	// The password in a URL, between `://user:` and `@`, unless it is a placeholder: `$VAR`,
@@ -338,8 +341,8 @@ Atlassian, npm, PyPI, RubyGems, Clojars, Docker Hub, Docker Swarm, CircleCI, Bui
 Face, Sourcegraph), an AI provider (Anthropic, OpenAI, OpenRouter, Groq, xAI, Replicate,
 Perplexity, LangSmith, Pinecone) or a service (Stripe live, Shopify, Shippo live, Slack,
 Telegram, SendGrid, Resend, Sentry, Grafana, New Relic, Dynatrace, PostHog, Linear, Notion,
-Figma, Contentful, Typeform, Postman, ReadMe, Prefect, Mapbox); an age key; a webhook signing
-secret; a Slack, Discord or Microsoft Teams webhook URL; a JWT; a password in a URL. A
+Figma, Contentful, Typeform, Postman, ReadMe, Prefect, Mapbox, People Data Labs); an age key;
+a webhook signing secret; a Slack, Discord or Microsoft Teams webhook URL; a JWT; a password in a URL. A
 Placeholder passes, such as AWS's documented example key, one of x's, or a GitHub, npm,
 Cloudflare or Atlassian token whose checksum fails. It names where, never the Secret itself.
 
